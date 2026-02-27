@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntropAi | Access</title>
+    <style>
+        :root { --bg: #000; --card: #0e0e0e; --accent: #00ff41; --text: #fff; --input: #161616; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .auth-card { background: var(--card); padding: 40px; border-radius: 30px; width: 320px; border: 1px solid #1a1a1a; text-align: center; }
+        .tabs { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+        .tab { cursor: pointer; color: #555; font-weight: bold; }
+        .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        input { width: 100%; background: var(--input); border: 1px solid #222; border-radius: 15px; padding: 15px; color: #fff; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="auth-card">
+    <div style="font-size: 24px; font-weight: 800; margin-bottom: 20px;">Antrop<span style="color:var(--accent)">Ai</span></div>
+    <div class="tabs">
+        <span id="t-login" class="tab active" onclick="toggle('login')">LOGIN</span>
+        <span id="t-reg" class="tab" onclick="toggle('reg')">REGISTER</span>
+    </div>
+
+    <div id="f-login">
+        <input type="text" id="l-user" placeholder="Username">
+        <input type="password" id="l-pass" placeholder="Password">
+        <button class="btn" onclick="doLogin()">LOGIN</button>
+    </div>
+
+    <div id="f-reg" class="hidden">
+        <input type="text" id="r-user" placeholder="Create Username">
+        <input type="password" id="r-pass" placeholder="Create Password">
+        <button class="btn" onclick="doRegister()">REGISTER & ENTER</button>
+    </div>
+</div>
+
+<script>
+    function toggle(mode) {
+        document.getElementById('f-login').classList.toggle('hidden', mode === 'reg');
+        document.getElementById('f-reg').classList.toggle('hidden', mode === 'login');
+        document.getElementById('t-login').classList.toggle('active', mode === 'login');
+        document.getElementById('t-reg').classList.toggle('active', mode === 'reg');
+    }
+
+    function doRegister() {
+        const u = document.getElementById('r-user').value.trim();
+        const p = document.getElementById('r-pass').value.trim();
+        
+        if(u !== "" && p !== "") {
+            localStorage.setItem(`db_${u}`, p);
+            localStorage.setItem('antrop_user', u);
+            localStorage.setItem('is_logged', 'true');
+            
+            console.log("Dados salvos. Redirecionando para home.html...");
+            window.location.href = "home.html";
+        } else {
+            alert("Preencha os campos!");
+        }
+    }
+
+    function doLogin() {
+        const u = document.getElementById('l-user').value.trim();
+        const p = document.getElementById('l-pass').value.trim();
+        const saved = localStorage.getItem(`db_${u}`);
+
+        if(saved && saved === p) {
+            localStorage.setItem('antrop_user', u);
+            localStorage.setItem('is_logged', 'true');
+            window.location.href = "home.html";
+        } else {
+            alert("Usu?rio ou senha incorretos.");
+        }
+    }
+</script>
+</body>
+</html>
