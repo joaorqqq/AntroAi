@@ -78,10 +78,7 @@
 
         /* BOTTOM UI */
         .bottom-ui { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 700px; background: var(--input-bg); border-radius: 24px; padding: 12px 20px; border: 1px solid #440044; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        #timeout-bar { display: none; height: 2px; background: #330033; border-radius: 2px; overflow: hidden; }
-        #timeout-bar.active { display: block; }
-        #timeout-bar-fill { height: 100%; width: 100%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: drain 30s linear forwards; }
-        @keyframes drain { from { width: 100%; } to { width: 0%; } }
+        #timeout-bar { display: none; }
         .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
         #prompt { background: transparent; border: none; color: white; flex-grow: 1; padding: 5px; font-size: 16px; outline: none; }
         #prompt:disabled { opacity: 0.5; }
@@ -231,7 +228,7 @@
 
 <script>
 const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
-const TIMEOUT_MS = 30000;
+const TIMEOUT_MS = 300000; // 5 minutos
 const userName = localStorage.getItem('antro_user') || 'User';
 
 let db = null, currentListener = null, isLoading = false;
@@ -421,12 +418,12 @@ async function triggerIA() {
     document.getElementById('lobby').style.display='none';
     appendMessage(userName, msg, '', false);
     currentMessages.push({sender:userName, text:msg, time:Date.now()});
-    input.value=''; checkInput(); setLoading(true); showTyping(); startTimeoutBar();
+    input.value=''; checkInput(); setLoading(true); showTyping();
 
     let timedOut=false;
     const th=setTimeout(()=>{
-        timedOut=true; removeTyping(); stopTimeoutBar(); setLoading(false);
-        const w="Sem resposta em 30s. O servidor pode estar ocupado.";
+        timedOut=true; removeTyping(); setLoading(false);
+        const w="Sem resposta em 5 minutos. O servidor pode estar offline.";
         appendMessage("AntroAi",w,"warning",false);
         currentMessages.push({sender:"AntroAi",text:w,type:"warning",time:Date.now()});
         saveCurrentChat();
@@ -441,13 +438,13 @@ async function triggerIA() {
             const data=snapshot.val();
             if(!data) return;
             if(data.status==="completed"){
-                clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+                clearTimeout(th); removeTyping(); setLoading(false);
                 appendMessage("AntroAi", data.response, '', true);
                 currentMessages.push({sender:"AntroAi",text:data.response,time:Date.now()});
                 saveCurrentChat();
                 ref.off('value',handler); currentListener=null; ref.remove();
             } else if(data.status==="error"){
-                clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+                clearTimeout(th); removeTyping(); setLoading(false);
                 const err=data.error||"Erro desconhecido.";
                 appendMessage("AntroAi",err,"error",false);
                 currentMessages.push({sender:"AntroAi",text:err,type:"error",time:Date.now()});
@@ -458,7 +455,7 @@ async function triggerIA() {
         ref.on('value',handler);
         currentListener={ref,fn:handler};
     } catch(e) {
-        clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+        clearTimeout(th); removeTyping(); setLoading(false);
         appendMessage("AntroAi","Falha ao enviar: "+e.message,"error",false);
     }
 }
