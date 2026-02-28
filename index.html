@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AntroAi | Access</title>
+    <title>AntropAi | Access</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
@@ -241,7 +241,7 @@
 
 <div class="card">
     <div class="logo">
-        <div class="logo-text">Antro<span class="grad">Ai</span></div>
+        <div class="logo-text">Antrop<span class="grad">Ai</span></div>
         <div class="logo-sub">Your personal intelligence</div>
     </div>
 
@@ -278,13 +278,19 @@
         <button class="btn" onclick="doRegister()">Create Account</button>
     </div>
 
-    <div class="footer-note">secured via firebase © AntropTeam</div>
+    <div class="footer-note">secured via firebase · no local storage</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-database.js"></script>
     <script>
     const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
+
+    // Auto-login: se já estiver logado, vai direto pro chat
+    if (localStorage.getItem('is_logged') === 'true' && localStorage.getItem('antro_user')) {
+        window.location.replace('home.html');
+    }
+
     firebase.initializeApp({ databaseURL: atob(_0xdb) });
     const db = firebase.database();
 
