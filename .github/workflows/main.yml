@@ -1,0 +1,27 @@
+name: Deploy AntropAi
+
+on:
+  push:
+    branches: [ main ] # Roda sempre que você salvar algo na branch principal
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest # Ele usa um Linux potente (Ubuntu)
+    steps:
+      - name: Baixando o código
+        uses: actions/checkout@v3
+
+      - name: Configurando Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Instalando Dependências (Sem erro de Termux!)
+        run: |
+          pip install -r requirements.txt
+          # Aqui ele instalaria o scikit-learn sem sofrimento
+
+      - name: Deploy para Discloud
+        run: |
+          # Aqui vai o comando para enviar os arquivos para a Discloud via API
+          echo "Enviando para o servidor da Discloud..."
