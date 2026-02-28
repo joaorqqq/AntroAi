@@ -1,243 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AntropAi | Access</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>AntroAi | Entrar</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b000b;
-            --accent: #ff0040;
-            --purple: #7a00ff;
+            --bg: #0b000b; --accent: #ff0040; --purple: #7a00ff;
             --ai-gradient: linear-gradient(45deg, #ff0040, #7a00ff);
-            --card: #130013;
-            --border: #2a002a;
-            --input-bg: #1a001a;
-            --text: #ffffff;
-            --subtext: #664466;
+            --card: #130013; --border: #2a002a; --input-bg: #1a001a;
+            --text: #ffffff; --subtext: #664466;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; animation: drift 8s ease-in-out infinite alternate; }
+        .orb-1 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(122,0,255,0.18) 0%, transparent 70%); top: -80px; right: -80px; }
+        .orb-2 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,0,64,0.12) 0%, transparent 70%); bottom: -60px; left: -60px; animation-delay: -4s; }
+        @keyframes drift { from { transform: scale(1) translateY(0); } to { transform: scale(1.1) translateY(-20px); } }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Syne', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
+        .card { position: relative; z-index: 10; background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 44px 40px 40px; width: 360px; box-shadow: 0 0 60px rgba(122,0,255,0.1); animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* Ambient background orbs */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-            animation: drift 8s ease-in-out infinite alternate;
-        }
-        .orb-1 {
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(122,0,255,0.18) 0%, transparent 70%);
-            top: -80px; right: -80px;
-        }
-        .orb-2 {
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(255,0,64,0.12) 0%, transparent 70%);
-            bottom: -60px; left: -60px;
-            animation-delay: -4s;
-        }
-        .orb-3 {
-            width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(122,0,255,0.1) 0%, transparent 70%);
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -2s;
-        }
-        @keyframes drift {
-            from { transform: scale(1) translateY(0px); }
-            to   { transform: scale(1.1) translateY(-20px); }
-        }
+        .logo { text-align: center; margin-bottom: 32px; }
+        .logo-text { font-size: 28px; font-weight: 800; }
+        .logo-text .grad { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--subtext); letter-spacing: 3px; margin-top: 4px; text-transform: uppercase; }
 
-        /* Card */
-        .card {
-            position: relative;
-            z-index: 10;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 44px 40px 40px;
-            width: 360px;
-            box-shadow: 0 0 60px rgba(122,0,255,0.1), 0 0 120px rgba(255,0,64,0.05);
-            animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+        /* Google button */
+        .btn-google {
+            width: 100%; background: #fff; color: #3c3c3c; border: none;
+            padding: 14px 20px; border-radius: 14px; font-family: 'Syne', sans-serif;
+            font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 12px; margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
         }
+        .btn-google:hover { background: #f0f0f0; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .btn-google:active { transform: scale(0.98); }
+        .btn-google svg { flex-shrink: 0; }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-text { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--subtext); letter-spacing: 2px; }
 
-        /* Logo */
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .logo-text {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-        .logo-text .grad {
-            background: var(--ai-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .logo-sub {
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            color: var(--subtext);
-            letter-spacing: 3px;
-            margin-top: 4px;
-            text-transform: uppercase;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: var(--input-bg);
-            border-radius: 14px;
-            padding: 4px;
-            margin-bottom: 28px;
-            border: 1px solid var(--border);
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: var(--subtext);
-            transition: all 0.25s ease;
-            user-select: none;
-        }
-        .tab.active {
-            background: var(--border);
-            color: var(--text);
-            box-shadow: 0 0 12px rgba(255,0,64,0.15);
-        }
-
-        /* Form */
         .form { display: flex; flex-direction: column; gap: 12px; }
-        .hidden { display: none !important; }
-
-        .input-wrap {
-            position: relative;
-            animation: fadeField 0.3s ease both;
-        }
-        @keyframes fadeField {
-            from { opacity: 0; transform: translateX(-8px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        .input-wrap:nth-child(2) { animation-delay: 0.06s; }
-
-        .input-label {
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 2px;
-            color: var(--subtext);
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        input {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px 18px;
-            color: var(--text);
-            font-family: 'DM Mono', monospace;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
+        .input-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--subtext); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        input { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
         input::placeholder { color: #3a003a; }
-        input:focus {
-            border-color: #440044;
-            box-shadow: 0 0 0 3px rgba(122,0,255,0.1);
-        }
+        input:focus { border-color: #440044; box-shadow: 0 0 0 3px rgba(122,0,255,0.1); }
 
-        /* Error message */
-        .error-msg {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: var(--accent);
-            text-align: center;
-            min-height: 16px;
-            animation: shake 0.3s ease;
-        }
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            25%      { transform: translateX(-6px); }
-            75%      { transform: translateX(6px); }
-        }
+        .error-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); text-align: center; min-height: 16px; animation: shake 0.3s ease; }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-        /* Button */
-        .btn {
-            width: 100%;
-            background: var(--ai-gradient);
-            color: #fff;
-            border: none;
-            padding: 15px;
-            border-radius: 14px;
-            font-family: 'Syne', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-            box-shadow: 0 4px 24px rgba(255,0,64,0.2);
-            margin-top: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255,255,255,0);
-            transition: background 0.2s;
-        }
-        .btn:hover { opacity: 0.9; box-shadow: 0 6px 32px rgba(255,0,64,0.35); transform: translateY(-1px); }
+        .btn { width: 100%; background: var(--ai-gradient); color: #fff; border: none; padding: 15px; border-radius: 14px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s, transform 0.15s; box-shadow: 0 4px 24px rgba(255,0,64,0.2); margin-top: 4px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn:active { transform: scale(0.98); }
 
-        /* Footer note */
-        .footer-note {
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            color: #2a002a;
-            text-align: center;
-            margin-top: 22px;
-            letter-spacing: 0.5px;
-        }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(11,0,11,0.85); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+        .loading-overlay.show { display: flex; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #330033; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--subtext); }
+
+        .footer-note { font-family: 'DM Mono', monospace; font-size: 10px; color: #2a002a; text-align: center; margin-top: 22px; }
     </style>
 </head>
 <body>
-
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
+
+<div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Entrando...</div>
+</div>
 
 <div class="card">
     <div class="logo">
@@ -245,102 +81,134 @@
         <div class="logo-sub">Your personal intelligence</div>
     </div>
 
-    <div class="tabs">
-        <div id="t-login" class="tab active" onclick="toggle('login')">LOGIN</div>
-        <div id="t-reg" class="tab" onclick="toggle('reg')">REGISTER</div>
+    <!-- Google Login -->
+    <button class="btn-google" onclick="loginGoogle()">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Entrar com Google
+    </button>
+
+    <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-text">OU</div>
+        <div class="divider-line"></div>
     </div>
 
-    <!-- LOGIN -->
-    <div id="f-login" class="form">
-        <div class="input-wrap">
-            <label class="input-label">Username</label>
-            <input type="text" id="l-user" placeholder="your_username" onkeydown="if(event.key==='Enter') doLogin()">
+    <!-- Email Login -->
+    <div class="form">
+        <div>
+            <label class="input-label">E-mail</label>
+            <input type="email" id="l-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter') doLogin()">
         </div>
-        <div class="input-wrap">
-            <label class="input-label">Password</label>
+        <div>
+            <label class="input-label">Senha</label>
             <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
         </div>
         <div id="login-err" class="error-msg"></div>
-        <button class="btn" onclick="doLogin()">Enter</button>
+        <button class="btn" onclick="doLogin()">Entrar</button>
     </div>
 
-    <!-- REGISTER -->
-    <div id="f-reg" class="form hidden">
-        <div class="input-wrap">
-            <label class="input-label">Username</label>
-            <input type="text" id="r-user" placeholder="choose_a_username" onkeydown="if(event.key==='Enter') doRegister()">
-        </div>
-        <div class="input-wrap">
-            <label class="input-label">Password</label>
-            <input type="password" id="r-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()">
-        </div>
-        <div id="reg-err" class="error-msg"></div>
-        <button class="btn" onclick="doRegister()">Create Account</button>
-    </div>
-
-    <div class="footer-note">secured via firebase · no local storage</div>
+    <div class="footer-note">AntropTeam · acesso seguro via Firebase</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-database.js"></script>
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
+<script>
     const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
+    const GOOGLE_CLIENT_ID = "1004159926560-meb1gn08ceele4t78eunhl93l0fgjve4.apps.googleusercontent.com";
 
-    // Auto-login: se já estiver logado, vai direto pro chat
+    firebase.initializeApp({
+        databaseURL: atob(_0xdb),
+        apiKey: "AIzaSyDummy", // Firebase Auth precisa de apiKey — substitua pela sua
+        authDomain: "aleatoria-4cd46.firebaseapp.com",
+        projectId: "aleatoria-4cd46"
+    });
+    const db   = firebase.database();
+    const auth = firebase.auth();
+
+    // Auto-login se já estiver autenticado
     if (localStorage.getItem('is_logged') === 'true' && localStorage.getItem('antro_user')) {
         window.location.replace('home.html');
     }
 
-    firebase.initializeApp({ databaseURL: atob(_0xdb) });
-    const db = firebase.database();
-
-    function toggle(mode) {
-        document.getElementById('f-login').classList.toggle('hidden', mode === 'reg');
-        document.getElementById('f-reg').classList.toggle('hidden', mode === 'login');
-        document.getElementById('t-login').classList.toggle('active', mode === 'login');
-        document.getElementById('t-reg').classList.toggle('active', mode === 'reg');
-        document.getElementById('login-err').textContent = '';
-        document.getElementById('reg-err').textContent = '';
+    function showLoading(on) {
+        document.getElementById('loading').classList.toggle('show', on);
     }
 
-    function showError(id, msg) {
-        const el = document.getElementById(id);
+    function showError(msg) {
+        const el = document.getElementById('login-err');
         el.textContent = msg;
         el.style.animation = 'none';
         void el.offsetWidth;
         el.style.animation = '';
     }
 
-    async function doRegister() {
-        const u = document.getElementById('r-user').value.trim().toLowerCase();
-        const p = document.getElementById('r-pass').value.trim();
-        if (!u || !p) { showError('reg-err', 'Fill in all fields.'); return; }
-        if (p.length < 8) { showError('reg-err', 'Password must be at least 8 characters.'); return; }
-
-        // Check if username already exists
-        const snap = await db.ref('users/' + u).once('value');
-        if (snap.val()) { showError('reg-err', 'Username already taken.'); return; }
-
-        await db.ref('users/' + u).set({ password: p });
-        localStorage.setItem('antro_user', u);
-        localStorage.setItem('is_logged', 'true');
-        window.location.href = "home.html";
+    function finishLogin(email, uid) {
+        // Verifica ban
+        const safeId = uid.replace(/[.@\/]/g, '_');
+        db.ref('admin/banned/' + safeId).once('value').then(snap => {
+            if (snap.val() === true || (snap.val() && snap.val().banned)) {
+                showLoading(false);
+                showError('Sua conta foi suspensa. Contate o suporte.');
+                auth.signOut();
+                return;
+            }
+            localStorage.setItem('antro_user', email);
+            localStorage.setItem('antro_uid', uid);
+            localStorage.setItem('is_logged', 'true');
+            window.location.replace('home.html');
+        });
     }
 
-    async function doLogin() {
-        const u = document.getElementById('l-user').value.trim().toLowerCase();
-        const p = document.getElementById('l-pass').value.trim();
-        if (!u || !p) { showError('login-err', 'Fill in all fields.'); return; }
+    // Google OAuth via popup
+    function loginGoogle() {
+        showLoading(true);
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).then(result => {
+            const user = result.user;
+            if (!user.email) {
+                auth.signOut();
+                showLoading(false);
+                showError('Erro: É necessário um e-mail cadastrado para acessar o AntroAi.');
+                return;
+            }
+            finishLogin(user.email, user.uid);
+        }).catch(err => {
+            showLoading(false);
+            showError('Erro ao entrar com Google: ' + err.message);
+        });
+    }
 
-        const snapshot = await db.ref('users/' + u).once('value');
-        const userData = snapshot.val();
-        if (userData && userData.password === p) {
-            localStorage.setItem('antro_user', u);
-            localStorage.setItem('is_logged', 'true');
-            window.location.href = "home.html";
-        } else {
-            showError('login-err', 'Usuário ou senha inválidos.');
-        }
+    // Login por e-mail/senha
+    async function doLogin() {
+        const email = document.getElementById('l-email').value.trim();
+        const pass  = document.getElementById('l-pass').value.trim();
+        if (!email || !pass) { showError('Preencha todos os campos.'); return; }
+        showLoading(true);
+        auth.signInWithEmailAndPassword(email, pass).then(result => {
+            const user = result.user;
+            if (!user.email) {
+                auth.signOut();
+                showLoading(false);
+                showError('Erro: É necessário um e-mail cadastrado para acessar o AntroAi.');
+                return;
+            }
+            finishLogin(user.email, user.uid);
+        }).catch(err => {
+            showLoading(false);
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                showError('E-mail ou senha inválidos.');
+            } else if (err.code === 'auth/invalid-email') {
+                showError('E-mail inválido.');
+            } else {
+                showError(err.message);
+            }
+        });
     }
 </script>
 </body>
