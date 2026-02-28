@@ -13,7 +13,17 @@
             --ai-gradient: linear-gradient(45deg, #ff0040, #7a00ff);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; height: 100vh; display: flex; overflow: hidden; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; height: 100vh; display: flex; overflow: hidden; flex-direction: column; }
+
+        /* GLOBAL BANNER */
+        #global-banner { display: none; background: linear-gradient(90deg, #330000, #1a001a); border-bottom: 1px solid #660011; padding: 10px 20px; font-size: 13px; color: #ffaaaa; text-align: center; z-index: 200; flex-shrink: 0; }
+        #global-banner.show { display: block; }
+
+        /* MAINTENANCE BANNER */
+        #maint-banner { display: none; background: #1a0000; border-bottom: 2px solid var(--accent); padding: 12px 20px; font-size: 13px; color: #ff8888; text-align: center; z-index: 200; font-weight: bold; flex-shrink: 0; }
+        #maint-banner.show { display: block; }
+
+        .app-body { display: flex; flex: 1; overflow: hidden; }
 
         /* SIDEBAR */
         #sidebar { width: 280px; background: var(--sidebar); height: 100%; position: fixed; left: -280px; z-index: 1000; transition: 0.3s ease; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #330033; }
@@ -37,7 +47,7 @@
         .history-item-del:hover { color: var(--accent); }
 
         /* MAIN */
-        #main { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; width: 100%; height: 100vh; position: relative; }
+        #main { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; width: 100%; height: 100%; position: relative; }
         #chat-container { flex-grow: 1; overflow-y: auto; width: 100%; max-width: 800px; margin: 60px auto 140px auto; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
         #chat-container::-webkit-scrollbar { width: 3px; }
         #chat-container::-webkit-scrollbar-thumb { background: #330033; }
@@ -50,6 +60,11 @@
         .msg-content.error { color: #ff4444; font-style: italic; }
         .msg-content.warning { color: #ffcc00; font-style: italic; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TTS button */
+        .tts-btn { background: none; border: 1px solid #330033; color: var(--subtext); font-size: 11px; padding: 4px 10px; border-radius: 20px; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; }
+        .tts-btn:hover { border-color: #660044; color: #fff; }
+        .tts-btn.speaking { border-color: var(--accent); color: var(--accent); }
 
         /* Typewriter cursor */
         .tw-cursor { display: inline-block; width: 2px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 0.7s infinite; }
@@ -64,12 +79,21 @@
 
         /* CODE BLOCKS */
         .code-block { background: #0d000d; border: 1px solid #2a002a; border-radius: 12px; margin: 10px 0; overflow: hidden; font-family: 'Courier New', monospace; }
-        .code-header { background: #1a001a; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a002a; }
-        .code-lang { font-size: 12px; font-weight: bold; color: var(--subtext); letter-spacing: 0.5px; }
-        .code-copy { background: none; border: none; cursor: pointer; color: var(--subtext); font-size: 12px; display: flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; }
-        .code-copy:hover { background: #2a002a; color: #fff; }
-        .code-copy.copied { color: #00cc66; }
+        .code-header { background: #1a001a; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a002a; gap: 8px; }
+        .code-lang { font-size: 12px; font-weight: bold; color: var(--subtext); letter-spacing: 0.5px; margin-right: auto; }
+        .code-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .code-btn { background: none; border: 1px solid #330033; cursor: pointer; color: var(--subtext); font-size: 11px; display: flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 6px; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; white-space: nowrap; }
+        .code-btn:hover { background: #2a002a; color: #fff; border-color: #550044; }
+        .code-btn.copied { color: #00cc66; border-color: #00cc66; }
         .code-body { padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #e0aaff; overflow-x: auto; white-space: pre; }
+
+        /* WEBVIEW */
+        #webview-panel { display: none; position: fixed; top: 0; right: 0; width: 50%; height: 100%; background: #fff; z-index: 800; border-left: 2px solid var(--accent); flex-direction: column; }
+        #webview-panel.open { display: flex; }
+        #webview-header { background: #1a001a; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #330033; flex-shrink: 0; }
+        #webview-header span { font-size: 13px; color: var(--subtext); font-weight: bold; }
+        #webview-close { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; padding: 0 4px; line-height: 1; }
+        #webview-frame { flex: 1; border: none; width: 100%; }
 
         /* LOBBY */
         #lobby { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: left; width: 90%; max-width: 550px; }
@@ -78,7 +102,6 @@
 
         /* BOTTOM UI */
         .bottom-ui { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 700px; background: var(--input-bg); border-radius: 24px; padding: 12px 20px; border: 1px solid #440044; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        #timeout-bar { display: none; }
         .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
         #prompt { background: transparent; border: none; color: white; flex-grow: 1; padding: 5px; font-size: 16px; outline: none; }
         #prompt:disabled { opacity: 0.5; }
@@ -100,11 +123,7 @@
         .modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
         .modal-tab-content { display: none; padding: 20px 24px 24px; }
         .modal-tab-content.active { display: block; }
-
-        /* Tab Lembranças */
         .memory-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; }
-        .memory-list::-webkit-scrollbar { width: 2px; }
-        .memory-list::-webkit-scrollbar-thumb { background: #330033; }
         .memory-item { background: #0d000d; border: 1px solid #220022; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #ccc; line-height: 1.5; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
         .memory-del { color: #440044; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: color 0.2s; line-height: 1; }
         .memory-del:hover { color: var(--accent); }
@@ -112,14 +131,9 @@
         .memory-input-row { display: flex; gap: 8px; }
         .memory-input { flex: 1; background: #0d000d; border: 1px solid #2a002a; border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; }
         .memory-input:focus { border-color: #660033; }
-        .memory-add-btn { background: var(--ai-gradient); color: #fff; border: none; border-radius: 10px; padding: 0 16px; cursor: pointer; font-size: 20px; transition: opacity 0.2s; }
-        .memory-add-btn:hover { opacity: 0.85; }
-
-        /* Tab API */
+        .memory-add-btn { background: var(--ai-gradient); color: #fff; border: none; border-radius: 10px; padding: 0 16px; cursor: pointer; font-size: 20px; }
         .api-info-box { background: #0d000d; border: 1px solid #220022; border-radius: 12px; padding: 14px; font-size: 12px; color: var(--subtext); line-height: 1.6; margin-bottom: 16px; }
         .api-info-box strong { color: #cc0033; }
-
-        /* Tab Config */
         .config-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #1a001a; }
         .config-row:last-of-type { border-bottom: none; }
         .config-label { font-size: 13px; color: #ccc; }
@@ -128,11 +142,8 @@
         .toggle.on { background: var(--accent); }
         .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left 0.25s; }
         .toggle.on::after { left: 21px; }
-
-        /* Shared buttons */
         .modal-btn { width: 100%; background: var(--ai-gradient); color: #fff; border: none; padding: 13px; border-radius: 12px; font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; }
         .modal-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-        .modal-btn:active { transform: scale(0.98); }
         .modal-btn-ghost { width: 100%; background: transparent; color: var(--subtext); border: 1px solid #330033; padding: 11px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; }
         .modal-btn-ghost:hover { border-color: #550044; color: #fff; }
         .modal-btn-danger { width: 100%; background: transparent; color: #ff4444; border: 1px solid #330011; padding: 11px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: all 0.2s; margin-top: 10px; font-family: 'Segoe UI', sans-serif; }
@@ -140,6 +151,12 @@
     </style>
 </head>
 <body>
+
+<!-- Banners globais (injetados pelo admin) -->
+<div id="maint-banner">🔧 Servidor em Manutenção — respostas pausadas temporariamente.</div>
+<div id="global-banner" id="global-banner"></div>
+
+<div class="app-body">
 
 <div class="menu-toggle" onclick="toggleMenu()">
     <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
@@ -162,18 +179,24 @@
     </div>
 </div>
 
+<!-- WebView Panel -->
+<div id="webview-panel">
+    <div id="webview-header">
+        <span>🌐 Preview</span>
+        <button id="webview-close" onclick="closeWebview()">×</button>
+    </div>
+    <iframe id="webview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+</div>
+
 <!-- Settings Modal -->
 <div id="modal-overlay" onclick="handleOverlayClick(event)">
     <div id="settings-modal">
-        <div class="modal-header">
-            <div class="modal-title">⚙ Settings</div>
-        </div>
+        <div class="modal-header"><div class="modal-title">⚙ Settings</div></div>
         <div class="modal-tabs">
             <div class="modal-tab active" onclick="switchTab('memorias')">Lembranças</div>
             <div class="modal-tab" onclick="switchTab('api')">API</div>
             <div class="modal-tab" onclick="switchTab('config')">Configurações</div>
         </div>
-
         <div class="modal-tab-content active" id="tab-memorias">
             <div class="memory-list" id="memory-list"></div>
             <div class="memory-input-row">
@@ -181,29 +204,18 @@
                 <button class="memory-add-btn" onclick="addMemory()">+</button>
             </div>
         </div>
-
         <div class="modal-tab-content" id="tab-api">
-            <div class="api-info-box">
-                Integre a <strong>AntroGPT1</strong> no seu site.<br><br>
-                Gere uma API Key pessoal para usar nossa IA em qualquer projeto externo.
-            </div>
+            <div class="api-info-box">Integre a <strong>AntroGPT1</strong> no seu site.<br><br>Gere uma API Key pessoal para usar nossa IA em qualquer projeto externo.</div>
             <button class="modal-btn" onclick="window.location.href='getapi.html'">🔑 Obter API Key</button>
             <button class="modal-btn-ghost" onclick="closeSettings()">Fechar</button>
         </div>
-
         <div class="modal-tab-content" id="tab-config">
             <div class="config-row">
-                <div>
-                    <div class="config-label">Auto-save de conversas</div>
-                    <div class="config-sub">Salva cada chat automaticamente</div>
-                </div>
+                <div><div class="config-label">Auto-save de conversas</div><div class="config-sub">Salva cada chat automaticamente</div></div>
                 <div class="toggle on" id="toggle-autosave" onclick="toggleConfig('autosave')"></div>
             </div>
             <div class="config-row">
-                <div>
-                    <div class="config-label">Animação de digitação</div>
-                    <div class="config-sub">IA digita letra por letra</div>
-                </div>
+                <div><div class="config-label">Animação de digitação</div><div class="config-sub">IA digita letra por letra</div></div>
                 <div class="toggle on" id="toggle-typewriter" onclick="toggleConfig('typewriter')"></div>
             </div>
             <button class="modal-btn-danger" onclick="clearAllChats()">🗑 Apagar todas as conversas</button>
@@ -213,12 +225,11 @@
 
 <div id="main">
     <div id="lobby">
-        <h1 class="greeting" id="user-display">Hello, User</h1>
+        <h1 class="greeting" id="user-display">Hello!</h1>
         <h1 class="sub-greeting">How can I help you today?</h1>
     </div>
     <div id="chat-container"></div>
     <div class="bottom-ui">
-        <div id="timeout-bar"><div id="timeout-bar-fill"></div></div>
         <div class="input-row">
             <input type="text" id="prompt" placeholder="Ask anything to AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
             <svg id="send-icon" class="svg-icon send-btn" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -226,14 +237,18 @@
     </div>
 </div>
 
+</div><!-- end app-body -->
+
 <script>
 const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
-const TIMEOUT_MS = 300000; // 5 minutos
+const TIMEOUT_MS = 300000;
 const userName = localStorage.getItem('antro_user') || 'User';
+const userUID  = localStorage.getItem('antro_uid')  || 'default_user';
 
 let db = null, currentListener = null, isLoading = false;
 let currentChatId = null, currentMessages = [];
 let config = JSON.parse(localStorage.getItem('antro_config') || '{"autosave":true,"typewriter":true}');
+let isMaintenance = false;
 
 if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
 
@@ -242,28 +257,86 @@ try {
     db = firebase.database();
 } catch(e) { setTimeout(() => appendMessage("AntroAi","Firebase error: "+e.message,"error"), 100); }
 
-document.getElementById('user-display').innerText = 'Hello, ' + userName;
+// Display name: use part before @ if email
+const displayName = userName.includes('@') ? userName.split('@')[0] : userName;
+document.getElementById('user-display').innerText = 'Hello, ' + displayName;
+
 loadHistory();
 renderMemories();
 applyConfig();
+watchAdmin();
 
-// ── HELPERS ──────────────────────────────────────────────────────
+// ── ADMIN WATCH ───────────────────────────────────────────────────
+function watchAdmin() {
+    if (!db) return;
+
+    // Maintenance
+    db.ref('admin/maintenance').on('value', snap => {
+        isMaintenance = snap.val() === true;
+        document.getElementById('maint-banner').classList.toggle('show', isMaintenance);
+    });
+
+    // Global banner
+    db.ref('admin/global_banner').on('value', snap => {
+        const msg = snap.val();
+        const el = document.getElementById('global-banner');
+        if (msg && typeof msg === 'string' && msg.trim()) {
+            el.textContent = '📢 ' + msg;
+            el.classList.add('show');
+        } else {
+            el.classList.remove('show');
+        }
+    });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
 function escapeHTML(str) {
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
 }
 
+// Extensions map for download
+const EXT_MAP = {
+    python:'py', py:'py', javascript:'js', js:'js', html:'html',
+    css:'css', lua:'lua', bash:'sh', shell:'sh', json:'json',
+    java:'java', cpp:'cpp', c:'c', php:'php', ruby:'rb',
+    typescript:'ts', ts:'ts', sql:'sql', xml:'xml', yaml:'yml'
+};
+
 function parseMessage(text) {
-    const codeRegex = /```(\w*)\n?([\s\S]*?)```/g;
+    // Detecta ```lang= ou ```lang
+    const codeRegex = /```(\w+)=?\n?([\s\S]*?)```/g;
     let result = '', lastIndex = 0, match;
     while ((match = codeRegex.exec(text)) !== null) {
         const before = text.slice(lastIndex, match.index);
         if (before) result += escapeHTML(before).replace(/\n/g,'<br>');
-        const lang = match[1] || 'código';
-        const code = escapeHTML(match[2]);
-        const id = 'cb' + Math.random().toString(36).slice(2,8);
-        result += `<div class="code-block"><div class="code-header"><span class="code-lang">${escapeHTML(lang)}</span><button class="code-copy" id="${id}" onclick="copyCode('${id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copiar</button></div><div class="code-body" id="body_${id}">${code}</div></div>`;
+        const lang = match[1].toLowerCase();
+        const code = match[2];
+        const id   = 'cb' + Math.random().toString(36).slice(2,8);
+        const ext  = EXT_MAP[lang] || 'txt';
+        const isHTML = lang === 'html';
+
+        result += `<div class="code-block">
+            <div class="code-header">
+                <span class="code-lang">${escapeHTML(lang)}</span>
+                <div class="code-actions">
+                    <button class="code-btn" id="btn_${id}" onclick="copyCode('${id}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        Copiar
+                    </button>
+                    <button class="code-btn" onclick="downloadCode('${id}','${ext}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        Baixar
+                    </button>
+                    ${isHTML ? `<button class="code-btn" onclick="previewHTML('${id}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                        Ver Site
+                    </button>` : ''}
+                </div>
+            </div>
+            <div class="code-body" id="body_${id}">${escapeHTML(code)}</div>
+        </div>`;
         lastIndex = match.index + match[0].length;
     }
     const rest = text.slice(lastIndex);
@@ -273,12 +346,62 @@ function parseMessage(text) {
 
 function copyCode(id) {
     const body = document.getElementById('body_'+id);
-    const btn  = document.getElementById(id);
+    const btn  = document.getElementById('btn_'+id);
     if (!body||!btn) return;
     navigator.clipboard.writeText(body.innerText).catch(()=>{});
     btn.classList.add('copied');
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copiado!';
-    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copiar'; }, 2000);
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copiado!';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copiar'; }, 2000);
+}
+
+function downloadCode(id, ext) {
+    const body = document.getElementById('body_'+id);
+    if (!body) return;
+    const blob = new Blob([body.innerText], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'antroai_code.' + ext;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function previewHTML(id) {
+    const body = document.getElementById('body_'+id);
+    if (!body) return;
+    const panel = document.getElementById('webview-panel');
+    const frame = document.getElementById('webview-frame');
+    frame.srcdoc = body.innerText;
+    panel.classList.add('open');
+    document.getElementById('main').style.width = '50%';
+}
+
+function closeWebview() {
+    document.getElementById('webview-panel').classList.remove('open');
+    document.getElementById('main').style.width = '';
+}
+
+// ── TTS ───────────────────────────────────────────────────────────
+let currentUtterance = null;
+
+function speakText(text, btn) {
+    if (!window.speechSynthesis) return;
+    if (currentUtterance) {
+        window.speechSynthesis.cancel();
+        currentUtterance = null;
+        document.querySelectorAll('.tts-btn').forEach(b => { b.classList.remove('speaking'); b.textContent = '🔊 Ouvir'; });
+        if (btn.dataset.speaking === 'true') { btn.dataset.speaking = 'false'; return; }
+    }
+    // Strip code blocks from TTS
+    const clean = text.replace(/```[\s\S]*?```/g, 'bloco de código').replace(/<[^>]+>/g,'');
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang = 'pt-BR';
+    utter.rate = 1.0;
+    currentUtterance = utter;
+    btn.classList.add('speaking');
+    btn.textContent = '⏹ Parar';
+    btn.dataset.speaking = 'true';
+    utter.onend = () => { btn.classList.remove('speaking'); btn.textContent = '🔊 Ouvir'; btn.dataset.speaking = 'false'; currentUtterance = null; };
+    window.speechSynthesis.speak(utter);
 }
 
 // ── APPEND MESSAGE ────────────────────────────────────────────────
@@ -287,9 +410,17 @@ function appendMessage(sender, text, type='', animate=false) {
     const isAI = sender === "AntroAi";
     const div = document.createElement('div');
     div.className = 'message';
-    div.innerHTML = `<span class="${isAI?'ai-label':'user-label'}">${escapeHTML(sender.toUpperCase())}</span><div class="msg-content${type?' '+type:''}"></div>`;
+
+    let ttsHtml = '';
+    if (isAI && !type) {
+        const ttsId = 'tts_' + Math.random().toString(36).slice(2,8);
+        ttsHtml = `<button class="tts-btn" id="${ttsId}" onclick="speakText(this.dataset.text, this)" data-text="${escapeHTML(text)}" data-speaking="false">🔊 Ouvir</button>`;
+    }
+
+    div.innerHTML = `<span class="${isAI?'ai-label':'user-label'}">${escapeHTML(sender.toUpperCase())}</span><div class="msg-content${type?' '+type:''}"></div>${ttsHtml}`;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
+
     const el = div.querySelector('.msg-content');
     if (isAI && animate && config.typewriter && !type && !text.includes('```')) {
         typewriter(el, text, container);
@@ -305,17 +436,14 @@ function typewriter(el, fullText, container) {
     el.innerHTML = '<span class="tw-cursor"></span>';
     function tick() {
         if (i < fullText.length) {
-            el.innerHTML = escapeHTML(fullText.slice(0, ++i)) + '<span class="tw-cursor"></span>';
+            el.innerHTML = escapeHTML(fullText.slice(0,++i))+'<span class="tw-cursor"></span>';
             container.scrollTop = container.scrollHeight;
             setTimeout(tick, 16);
-        } else {
-            el.innerHTML = parseMessage(fullText);
-        }
+        } else { el.innerHTML = parseMessage(fullText); }
     }
     setTimeout(tick, 16);
 }
 
-// ── TYPING INDICATOR ──────────────────────────────────────────────
 function showTyping() {
     removeTyping();
     const c = document.getElementById('chat-container');
@@ -326,38 +454,22 @@ function showTyping() {
 }
 function removeTyping() { document.getElementById('typing-msg')?.remove(); }
 
-// ── LOADING ───────────────────────────────────────────────────────
 function setLoading(on) {
     isLoading = on;
     document.getElementById('prompt').disabled = on;
     if (on) document.getElementById('send-icon').classList.remove('active');
     else { checkInput(); document.getElementById('prompt').focus(); }
 }
-function startTimeoutBar() {
-    const bar = document.getElementById('timeout-bar');
-    const oldFill = document.getElementById('timeout-bar-fill');
-    const nf = oldFill.cloneNode(true);
-    bar.replaceChild(nf, oldFill);
-    void nf.offsetWidth;
-    bar.classList.add('active');
-}
-function stopTimeoutBar() { document.getElementById('timeout-bar').classList.remove('active'); }
 
 // ── CONVERSATIONS ─────────────────────────────────────────────────
 function getAllChats() { return JSON.parse(localStorage.getItem('antro_chats')||'{}'); }
 function saveChats(c) { localStorage.setItem('antro_chats', JSON.stringify(c)); }
 
 function saveCurrentChat() {
-    if (!config.autosave || !currentChatId || currentMessages.length===0) return;
+    if (!config.autosave||!currentChatId||currentMessages.length===0) return;
     const chats = getAllChats();
-    chats[currentChatId] = {
-        id: currentChatId,
-        title: currentMessages[0].text.slice(0,40),
-        messages: currentMessages,
-        updatedAt: Date.now()
-    };
-    saveChats(chats);
-    loadHistory();
+    chats[currentChatId] = { id:currentChatId, title:currentMessages[0].text.slice(0,40), messages:currentMessages, updatedAt:Date.now() };
+    saveChats(chats); loadHistory();
 }
 
 function loadHistory() {
@@ -365,38 +477,29 @@ function loadHistory() {
     const list  = document.getElementById('history-list');
     const sorted = Object.values(chats).sort((a,b)=>b.updatedAt-a.updatedAt);
     if (!sorted.length) { list.innerHTML='<div style="font-size:12px;color:#440044;padding:6px 4px;">Nenhuma conversa.</div>'; return; }
-    list.innerHTML = sorted.map(c=>`
-        <div class="history-item ${c.id===currentChatId?'active':''}" onclick="loadChat('${c.id}')">
-            <div class="history-item-title">${escapeHTML(c.title)}</div>
-            <div class="history-item-date">${timeAgo(c.updatedAt)}</div>
-            <span class="history-item-del" onclick="deleteChat(event,'${c.id}')">×</span>
-        </div>`).join('');
+    list.innerHTML = sorted.map(c=>`<div class="history-item ${c.id===currentChatId?'active':''}" onclick="loadChat('${c.id}')"><div class="history-item-title">${escapeHTML(c.title)}</div><div class="history-item-date">${timeAgo(c.updatedAt)}</div><span class="history-item-del" onclick="deleteChat(event,'${c.id}')">×</span></div>`).join('');
 }
 
 function loadChat(id) {
     const chat = getAllChats()[id];
     if (!chat) return;
-    currentChatId = id; currentMessages = chat.messages||[];
-    const c = document.getElementById('chat-container');
-    c.innerHTML='';
+    currentChatId=id; currentMessages=chat.messages||[];
+    const c=document.getElementById('chat-container'); c.innerHTML='';
     document.getElementById('lobby').style.display='none';
-    currentMessages.forEach(m => appendMessage(m.sender, m.text, m.type||'', false));
+    currentMessages.forEach(m=>appendMessage(m.sender,m.text,m.type||'',false));
     loadHistory();
-    if (window.innerWidth<768) toggleMenu();
+    if(window.innerWidth<768) toggleMenu();
 }
 
-function deleteChat(e, id) {
+function deleteChat(e,id) {
     e.stopPropagation();
-    const chats = getAllChats();
-    delete chats[id];
-    saveChats(chats);
-    if (currentChatId===id) newChat(); else loadHistory();
+    const chats=getAllChats(); delete chats[id]; saveChats(chats);
+    if(currentChatId===id) newChat(); else loadHistory();
 }
 
 function clearAllChats() {
-    if (!confirm('Apagar todas as conversas?')) return;
-    localStorage.removeItem('antro_chats');
-    newChat(); closeSettings();
+    if(!confirm('Apagar todas as conversas?')) return;
+    localStorage.removeItem('antro_chats'); newChat(); closeSettings();
 }
 
 function timeAgo(ts) {
@@ -410,14 +513,20 @@ function timeAgo(ts) {
 // ── SEND ──────────────────────────────────────────────────────────
 async function triggerIA() {
     if (isLoading||!db) return;
-    const input = document.getElementById('prompt');
-    const msg = input.value.trim();
+
+    if (isMaintenance) {
+        appendMessage("AntroAi","Servidor em manutenção no momento. Tente mais tarde.","warning",false);
+        return;
+    }
+
+    const input=document.getElementById('prompt');
+    const msg=input.value.trim();
     if (!msg) return;
-    if (currentListener) { currentListener.ref.off('value',currentListener.fn); currentListener=null; }
-    if (!currentChatId) currentChatId = 'chat_'+Date.now();
+    if (currentListener){currentListener.ref.off('value',currentListener.fn);currentListener=null;}
+    if (!currentChatId) currentChatId='chat_'+Date.now();
     document.getElementById('lobby').style.display='none';
-    appendMessage(userName, msg, '', false);
-    currentMessages.push({sender:userName, text:msg, time:Date.now()});
+    appendMessage(userName,msg,'',false);
+    currentMessages.push({sender:userName,text:msg,time:Date.now()});
     input.value=''; checkInput(); setLoading(true); showTyping();
 
     let timedOut=false;
@@ -431,15 +540,16 @@ async function triggerIA() {
     }, TIMEOUT_MS);
 
     try {
-        const ref = db.ref('queue').push();
-        await ref.set({message:msg, status:"pending", time:Date.now()});
+        const ref=db.ref('queue').push();
+        await ref.set({message:msg, status:"pending", time:Date.now(), uid:userUID});
+
         const handler=(snapshot)=>{
             if(timedOut) return;
             const data=snapshot.val();
             if(!data) return;
             if(data.status==="completed"){
                 clearTimeout(th); removeTyping(); setLoading(false);
-                appendMessage("AntroAi", data.response, '', true);
+                appendMessage("AntroAi",data.response,'',true);
                 currentMessages.push({sender:"AntroAi",text:data.response,time:Date.now()});
                 saveCurrentChat();
                 ref.off('value',handler); currentListener=null; ref.remove();
@@ -454,7 +564,7 @@ async function triggerIA() {
         };
         ref.on('value',handler);
         currentListener={ref,fn:handler};
-    } catch(e) {
+    } catch(e){
         clearTimeout(th); removeTyping(); setLoading(false);
         appendMessage("AntroAi","Falha ao enviar: "+e.message,"error",false);
     }
@@ -477,8 +587,7 @@ function addMemory() {
 }
 function deleteMemory(i) {
     const mems=getMemories(); mems.splice(i,1);
-    localStorage.setItem('antro_memories',JSON.stringify(mems));
-    renderMemories();
+    localStorage.setItem('antro_memories',JSON.stringify(mems)); renderMemories();
 }
 
 // ── CONFIG ────────────────────────────────────────────────────────
@@ -488,8 +597,7 @@ function applyConfig() {
 }
 function toggleConfig(key) {
     config[key]=!config[key];
-    localStorage.setItem('antro_config',JSON.stringify(config));
-    applyConfig();
+    localStorage.setItem('antro_config',JSON.stringify(config)); applyConfig();
 }
 
 // ── SETTINGS ──────────────────────────────────────────────────────
@@ -520,7 +628,11 @@ function newChat() {
     if(window.innerWidth<768) toggleMenu();
 }
 function logout() {
-    saveCurrentChat(); localStorage.removeItem('is_logged'); window.location.href='index.html';
+    saveCurrentChat();
+    localStorage.removeItem('is_logged');
+    localStorage.removeItem('antro_user');
+    localStorage.removeItem('antro_uid');
+    window.location.href='index.html';
 }
 </script>
 </body>
