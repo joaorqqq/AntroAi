@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AntroAi | Get API Key</title>
+    <title>AntroAi | API Key</title>
 
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
@@ -45,8 +45,8 @@
         .back-btn {
             display: inline-flex; align-items: center; gap: 6px;
             font-size: 12px; color: var(--subtext); cursor: pointer;
-            margin-bottom: 24px; transition: color 0.2s;
-            background: none; border: none; padding: 0;
+            margin-bottom: 24px; background: none; border: none; padding: 0;
+            transition: color 0.2s;
         }
         .back-btn:hover { color: #fff; }
 
@@ -74,11 +74,10 @@
         hr { border: none; border-top: 1px solid #1a001a; margin: 22px 0; }
 
         #status-box {
-            display: none; background: #0d000d;
-            border: 1px solid #220022; border-radius: 12px;
-            padding: 14px 16px; font-family: 'Courier New', monospace;
-            font-size: 11px; color: var(--subtext);
-            min-height: 48px; word-break: break-all;
+            display: none; background: #0d000d; border: 1px solid #220022;
+            border-radius: 12px; padding: 14px 16px;
+            font-family: 'Courier New', monospace; font-size: 11px;
+            color: var(--subtext); min-height: 48px; word-break: break-all;
             line-height: 1.6; margin-bottom: 16px;
         }
         #status-box.show    { display: block; }
@@ -95,16 +94,13 @@
         .btn-copy {
             flex: 1; background: #0d000d; color: #00cc66;
             border: 1px solid #003322; padding: 12px 14px;
-            border-radius: 12px; font-size: 11px;
-            font-family: 'Courier New', monospace;
-            cursor: pointer; text-align: left; word-break: break-all;
-            transition: background 0.2s;
+            border-radius: 12px; font-size: 11px; font-family: 'Courier New', monospace;
+            cursor: pointer; text-align: left; word-break: break-all; transition: background 0.2s;
         }
         .btn-copy:hover { background: #120012; }
         .btn-copy-icon {
-            background: #003322; color: #00cc66;
-            border: 1px solid #003322; padding: 12px 14px;
-            border-radius: 12px; cursor: pointer;
+            background: #003322; color: #00cc66; border: 1px solid #003322;
+            padding: 12px 14px; border-radius: 12px; cursor: pointer;
             font-size: 14px; transition: background 0.2s; flex-shrink: 0;
         }
         .btn-copy-icon:hover { background: #004433; }
@@ -139,21 +135,21 @@
 <div class="card">
     <button class="back-btn" onclick="window.location.href='home.html'">← Voltar ao chat</button>
 
-    <div class="page-title">🔑 Obter API Key</div>
-    <div class="page-sub">Sua chave pessoal AntropTeam. Gerada pelo servidor e salva só no seu dispositivo.</div>
+    <div class="page-title">🔑 API Key — AntropTeam</div>
+    <div class="page-sub">Integre a <strong style="color:#cc0033">AntroGPT1</strong> no seu site. Sua key é gerada pelo servidor e fica salva localmente.</div>
 
     <div class="step">
         <div class="step-num">1</div>
         <div class="step-content">
             <div class="step-title">Solicitar ao servidor</div>
-            <div class="step-desc">O pedido vai para o Firebase. O servidor AntropTeam processa e gera sua key exclusiva.</div>
+            <div class="step-desc">O servidor AntropTeam recebe o pedido via Firebase e gera uma key exclusiva pra você.</div>
         </div>
     </div>
     <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-            <div class="step-title">Salvar e usar</div>
-            <div class="step-desc">A key é salva localmente e você volta ao chat pronto para usar.</div>
+            <div class="step-title">Copiar e usar</div>
+            <div class="step-desc">Use a key para autenticar chamadas à API da AntroGPT1 no seu projeto.</div>
         </div>
     </div>
 
@@ -168,9 +164,9 @@
     </div>
 
     <button class="btn-main" id="gen-btn" onclick="requestKey()">Gerar minha API Key</button>
-    <button class="btn-ghost" id="save-btn" onclick="saveAndGo()">✓ Salvar e ir para o chat</button>
+    <button class="btn-ghost" id="save-btn" onclick="saveAndGo()">✓ Salvar e voltar ao chat</button>
 
-    <div class="note">Sua key é armazenada apenas neste dispositivo.<br>Nunca compartilhe com ninguém.</div>
+    <div class="note">Sua key é armazenada apenas neste dispositivo.<br>Não compartilhe com ninguém.</div>
 </div>
 
 <script>
@@ -225,7 +221,6 @@
         startTimeoutBar();
 
         let timedOut = false;
-
         timeoutHandle = setTimeout(() => {
             timedOut = true;
             stopTimeoutBar();
@@ -236,7 +231,7 @@
         }, TIMEOUT_MS);
 
         try {
-            // Escreve pedido na fila key_requests
+            // Pedido para o servidor gerar a key
             const ref = db.ref('key_requests').push();
             await ref.set({
                 user: localStorage.getItem('antro_user') || 'unknown',
@@ -244,7 +239,7 @@
                 timestamp: Date.now()
             });
 
-            setStatus('loading', '⟳ Pedido enviado. Aguardando geração da key...');
+            setStatus('loading', '⟳ Pedido enviado. Gerando sua key...');
 
             const handler = (snapshot) => {
                 if (timedOut) return;
@@ -260,7 +255,6 @@
                     document.getElementById('key-display').textContent = generatedKey;
                     copyRow.classList.add('show');
                     saveBtn.classList.add('show');
-
                     genBtn.disabled = false;
                     genBtn.textContent = 'Gerar nova key';
 
@@ -271,11 +265,9 @@
                 } else if (data.status === 'error') {
                     clearTimeout(timeoutHandle);
                     stopTimeoutBar();
-
                     setStatus('error', '✗ Erro do servidor: ' + (data.error || 'desconhecido'));
                     genBtn.disabled = false;
                     genBtn.textContent = 'Tentar novamente';
-
                     ref.off('value', handler);
                     activeListener = null;
                 }
@@ -304,6 +296,7 @@
 
     function saveAndGo() {
         if (!generatedKey) return;
+        // Salva localmente para uso futuro
         localStorage.setItem('antro_api_key', generatedKey);
         window.location.href = 'home.html';
     }
