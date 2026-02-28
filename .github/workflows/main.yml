@@ -1,27 +1,21 @@
-name: Deploy AntropAi
-
+name: AntropAi_Brain_v2
 on:
-  push:
-    branches: [ main ] # Roda sempre que você salvar algo na branch principal
+  schedule:
+    - cron: '*/5 * * * *' # Roda a cada 5 min
+  workflow_dispatch:      # Botão manual
 
 jobs:
-  build_and_deploy:
-    runs-on: ubuntu-latest # Ele usa um Linux potente (Ubuntu)
+  process:
+    runs-on: ubuntu-latest
     steps:
-      - name: Baixando o código
-        uses: actions/checkout@v3
-
-      - name: Configurando Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-
-      - name: Instalando Dependências (Sem erro de Termux!)
-        run: |
-          pip install -r requirements.txt
-          # Aqui ele instalaria o scikit-learn sem sofrimento
-
-      - name: Deploy para Discloud
-        run: |
-          # Aqui vai o comando para enviar os arquivos para a Discloud via API
-          echo "Enviando para o servidor da Discloud..."
+      - name: Install
+        run: pip install requests wikipedia scikit-learn numpy
+      - name: Run
+        env:
+          # Crie esse Secret no Settings do GitHub com o link do seu Firebase
+          FB_URL: ${{ secrets.FIREBASE_URL }}
+        run: python Pythons/process_queue.py
