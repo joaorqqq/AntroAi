@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AntroAi</title>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
 
@@ -30,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* Sidebar */
+        /* ── SIDEBAR ─────────────────────────────────────────────── */
         #sidebar {
             width: 280px; background: var(--sidebar); height: 100%;
             position: fixed; left: -280px; z-index: 1000;
@@ -38,17 +38,26 @@
             border-right: 1px solid #330033;
         }
         #sidebar.active { left: 0; }
-        
+
         .menu-toggle { position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 500; }
 
         .new-chat-sidebar {
             background: #2a002a; padding: 12px; border-radius: 12px;
             text-align: center; font-size: 14px; margin-top: 50px;
             margin-bottom: 20px; cursor: pointer; border: 1px solid #440044;
-            font-weight: bold; color: #fff;
+            font-weight: bold; color: #fff; transition: background 0.2s;
         }
+        .new-chat-sidebar:hover { background: #3a003a; }
 
-        /* Main Content */
+        .sidebar-item {
+            padding: 11px 12px; cursor: pointer; border-radius: 8px;
+            font-size: 14px; color: var(--subtext);
+            display: flex; align-items: center; gap: 10px;
+            transition: background 0.2s, color 0.2s; margin-bottom: 4px;
+        }
+        .sidebar-item:hover { background: #2a002a; color: #fff; }
+
+        /* ── MAIN ────────────────────────────────────────────────── */
         #main {
             flex-grow: 1; display: flex; flex-direction: column;
             padding: 20px; width: 100%; height: 100vh; position: relative;
@@ -57,44 +66,135 @@
         #chat-container {
             flex-grow: 1; overflow-y: auto; width: 100%;
             max-width: 800px; margin: 60px auto 140px auto;
-            display: flex; flex-direction: column; gap: 25px;
-            padding: 10px;
+            display: flex; flex-direction: column; gap: 25px; padding: 10px;
         }
 
-        /* Mensagens */
+        /* ── MESSAGES ────────────────────────────────────────────── */
         .message { margin-bottom: 5px; animation: fadeIn 0.3s ease; }
         .user-label { color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px; font-size: 12px; }
-        .ai-label { 
+        .ai-label {
             background: var(--ai-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-weight: bold; display: block; margin-bottom: 5px; font-size: 12px;
         }
         .msg-content { color: #e0e0e0; font-size: 16px; line-height: 1.6; word-wrap: break-word; }
+        .msg-content.error   { color: #ff4444; font-style: italic; }
+        .msg-content.warning { color: #ffcc00; font-style: italic; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Lobby */
+        /* Typing dots */
+        .typing { display: inline-flex; gap: 5px; align-items: center; padding: 4px 0; }
+        .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: tdot 0.9s ease infinite; }
+        .typing span:nth-child(2) { animation-delay: 0.15s; }
+        .typing span:nth-child(3) { animation-delay: 0.30s; }
+        @keyframes tdot { 0%,80%,100% { transform: translateY(0); opacity: 0.3; } 40% { transform: translateY(-6px); opacity: 1; } }
+
+        /* ── LOBBY ───────────────────────────────────────────────── */
         #lobby {
             position: absolute; top: 40%; left: 50%;
             transform: translate(-50%, -50%); text-align: left; width: 90%; max-width: 550px;
         }
-        .greeting { font-size: 40px; font-weight: 600; letter-spacing: -1px; }
+        .greeting     { font-size: 40px; font-weight: 600; letter-spacing: -1px; }
         .sub-greeting { font-size: 40px; font-weight: 600; color: #220022; }
 
-        /* Input */
+        /* ── BOTTOM UI ───────────────────────────────────────────── */
         .bottom-ui {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             width: 92%; max-width: 700px; background: var(--input-bg);
             border-radius: 24px; padding: 12px 20px; border: 1px solid #440044;
             display: flex; flex-direction: column; gap: 10px; z-index: 100;
         }
+
+        #timeout-bar { display: none; height: 2px; background: #330033; border-radius: 2px; overflow: hidden; }
+        #timeout-bar.active { display: block; }
+        #timeout-bar-fill { height: 100%; width: 100%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: drain 30s linear forwards; }
+        @keyframes drain { from { width: 100%; } to { width: 0%; } }
+
         .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
         #prompt { background: transparent; border: none; color: white; flex-grow: 1; padding: 5px; font-size: 16px; outline: none; }
-        .svg-icon { width: 24px; height: 24px; fill: var(--subtext); cursor: pointer; transition: 0.2s; }
+        #prompt:disabled { opacity: 0.5; }
+
+        .svg-icon { width: 24px; height: 24px; fill: var(--subtext); cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .svg-icon:hover { fill: #fff; }
+        .send-btn { fill: #330033; }
         .send-btn.active { fill: var(--accent); }
 
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 900; }
+
+        /* ── SETTINGS MODAL ──────────────────────────────────────── */
+        #modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); z-index: 1500;
+            align-items: center; justify-content: center;
+        }
+        #modal-overlay.open { display: flex; }
+
+        #settings-modal {
+            background: var(--sidebar);
+            border: 1px solid #440044;
+            border-radius: 20px;
+            padding: 30px;
+            width: 340px;
+            box-shadow: 0 0 40px rgba(255,0,64,0.12);
+            animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .modal-title {
+            background: var(--ai-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 18px; font-weight: bold; margin-bottom: 6px;
+        }
+        .modal-subtitle {
+            font-size: 12px; color: var(--subtext); margin-bottom: 24px;
+        }
+
+        .modal-label {
+            font-size: 10px; letter-spacing: 2px; color: var(--subtext);
+            text-transform: uppercase; margin-bottom: 8px; display: block;
+        }
+
+        .api-status-box {
+            background: #0d000d; border: 1px solid #330033;
+            border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+        }
+        .api-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+            background: #330033;
+        }
+        .api-dot.active { background: #00cc66; box-shadow: 0 0 6px #00cc66; }
+        .api-status-text { font-size: 12px; color: var(--subtext); font-family: 'Courier New', monospace; }
+        .api-status-text.active { color: #00cc66; }
+
+        .modal-btn {
+            width: 100%; background: var(--ai-gradient); color: #fff;
+            border: none; padding: 13px; border-radius: 12px;
+            font-size: 13px; font-weight: bold; letter-spacing: 1px;
+            cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+            margin-bottom: 10px;
+        }
+        .modal-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .modal-btn:active { transform: scale(0.98); }
+
+        .modal-btn-ghost {
+            width: 100%; background: transparent; color: var(--subtext);
+            border: 1px solid #330033; padding: 11px; border-radius: 12px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .modal-btn-ghost:hover { border-color: #550044; color: #fff; }
+
+        .modal-divider {
+            border: none; border-top: 1px solid #220022; margin: 16px 0;
+        }
+
+        .modal-danger {
+            width: 100%; background: transparent; color: #ff4444;
+            border: 1px solid #330011; padding: 11px; border-radius: 12px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .modal-danger:hover { background: rgba(255,0,0,0.08); border-color: #ff4444; }
     </style>
 </head>
 <body>
@@ -102,103 +202,251 @@
     <div class="menu-toggle" onclick="toggleMenu()">
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
     </div>
-    
+
     <div id="overlay" onclick="toggleMenu()"></div>
 
     <div id="sidebar">
-        <div class="new-chat-sidebar" onclick="newChat()">+ New Session</div>
-        <p style="color:var(--accent); font-weight:bold; margin-bottom:20px; font-size: 18px;">AntroAi</p>
-        <div style="color:#440044; font-size:11px; font-weight: bold; letter-spacing: 1px; margin-bottom: 15px;">SECURE HISTORY</div>
-        <div id="history-list" style="color:#664466; font-size: 13px;">Encrypted connection active.</div>
-        
-        <div style="margin-top:auto; padding-top: 20px; border-top: 1px solid #220022;">
-            <div style="color:var(--accent); cursor:pointer; font-size: 14px;" onclick="logout()">Terminate Session</div>
+        <div class="new-chat-sidebar" onclick="newChat()">+ New Chat</div>
+        <p style="color:var(--accent); font-weight:bold; margin-bottom:20px; font-size:18px;">AntroAi</p>
+
+        <div style="color:#440044; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:10px;">MENU</div>
+
+        <div class="sidebar-item" onclick="openSettings()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            Settings
+        </div>
+        <div class="sidebar-item" onclick="newChat()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            Reset Session
+        </div>
+
+        <div style="margin-top:auto; padding-top:20px; border-top:1px solid #220022;">
+            <div id="api-status-sidebar" style="font-size:11px; color:#330033; margin-bottom:12px; font-family:monospace;">API: não configurada</div>
+            <div style="color:var(--accent); cursor:pointer; font-size:14px;" onclick="logout()">Sign Out</div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-overlay" onclick="handleOverlayClick(event)">
+        <div id="settings-modal">
+            <div class="modal-title">⚙ Settings</div>
+            <div class="modal-subtitle">Configurações da sua conta</div>
+
+            <label class="modal-label">Status da API Key</label>
+            <div class="api-status-box">
+                <div class="api-dot" id="api-dot"></div>
+                <div class="api-status-text" id="api-status-text">Nenhuma key configurada</div>
+            </div>
+
+            <button class="modal-btn" onclick="goGetApi()">🔑 Obter / Gerar API Key</button>
+
+            <hr class="modal-divider">
+
+            <button class="modal-btn-ghost" onclick="closeSettings()">Fechar</button>
+
+            <hr class="modal-divider">
+
+            <button class="modal-danger" onclick="clearKey()">Remover API Key</button>
         </div>
     </div>
 
     <div id="main">
         <div id="lobby">
-            <h1 class="greeting" id="user-display">System Ready</h1>
-            <h1 class="sub-greeting">How can AntroAi help you?</h1>
+            <h1 class="greeting" id="user-display">Hello, User</h1>
+            <h1 class="sub-greeting">How can I help you today?</h1>
         </div>
 
         <div id="chat-container"></div>
 
         <div class="bottom-ui">
+            <div id="timeout-bar"><div id="timeout-bar-fill"></div></div>
             <div class="input-row">
-                <input type="text" id="prompt" placeholder="Message AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
+                <input type="text" id="prompt" placeholder="Ask anything to AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
                 <svg id="send-icon" class="svg-icon send-btn" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </div>
         </div>
     </div>
 
     <script>
-        // AntroAi Core Config
-        const _0xcore = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
-        firebase.initializeApp({ databaseURL: atob(_0xcore) });
-        const core = firebase.database();
+        const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
+        const TIMEOUT_MS = 30000;
+
+        let db = null, currentListener = null, isLoading = false;
+
+        try {
+            firebase.initializeApp({ databaseURL: atob(_0xdb) });
+            db = firebase.database();
+        } catch (e) {
+            setTimeout(() => appendMessage("AntroAi", "Firebase init error: " + e.message, "error"), 100);
+        }
 
         const userName = localStorage.getItem('antro_user') || 'User';
         document.getElementById('user-display').innerText = `Hello, ${userName}`;
+        refreshApiStatus();
 
-        function appendMessage(sender, text) {
+        // ── HELPERS ──────────────────────────────────────────────
+
+        function escapeHTML(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function appendMessage(sender, text, type = '') {
             const container = document.getElementById('chat-container');
             const isAI = sender === "AntroAi";
-            
-            // Remove o lobby se houver mensagens
-            document.getElementById('lobby').style.display = 'none';
-
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message';
-            msgDiv.innerHTML = `
-                <span class="${isAI ? 'ai-label' : 'user-label'}">${sender.toUpperCase()}</span>
-                <div class="msg-content">${text}</div>
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `
+                <span class="${isAI ? 'ai-label' : 'user-label'}">${escapeHTML(sender.toUpperCase())}</span>
+                <div class="msg-content ${type}">${escapeHTML(text)}</div>
             `;
-            
-            container.appendChild(msgDiv);
+            container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        // ESCUTA EM TEMPO REAL (Para ver em múltiplos dispositivos)
-        const sessionRef = core.ref('global_chat');
-        sessionRef.limitToLast(15).on('child_added', (snapshot) => {
-            const data = snapshot.val();
-            appendMessage(data.user, data.text);
-        });
+        function showTyping() {
+            removeTyping();
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = 'message'; div.id = 'typing-msg';
+            div.innerHTML = `<span class="ai-label">ANTROAI</span><div class="msg-content"><span class="typing"><span></span><span></span><span></span></span></div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTyping() { document.getElementById('typing-msg')?.remove(); }
+
+        function setLoading(on) {
+            isLoading = on;
+            document.getElementById('prompt').disabled = on;
+            if (on) document.getElementById('send-icon').classList.remove('active');
+            else { checkInput(); document.getElementById('prompt').focus(); }
+        }
+
+        function startTimeoutBar() {
+            const bar = document.getElementById('timeout-bar');
+            const oldFill = document.getElementById('timeout-bar-fill');
+            const newFill = oldFill.cloneNode(true);
+            bar.replaceChild(newFill, oldFill);
+            void newFill.offsetWidth;
+            bar.classList.add('active');
+        }
+
+        function stopTimeoutBar() { document.getElementById('timeout-bar').classList.remove('active'); }
+
+        // ── SEND ─────────────────────────────────────────────────
 
         async function triggerIA() {
+            if (isLoading || !db) return;
+
+            const key = localStorage.getItem('antro_api_key');
+            if (!key) {
+                openSettings();
+                return;
+            }
+
             const input = document.getElementById('prompt');
             const msg = input.value.trim();
             if (!msg) return;
 
+            if (currentListener) { currentListener.ref.off('value', currentListener.fn); currentListener = null; }
+
+            document.getElementById('lobby').style.display = 'none';
+            appendMessage(userName, msg);
             input.value = "";
             checkInput();
+            setLoading(true);
+            showTyping();
+            startTimeoutBar();
 
-            // 1. Envia para o log de mensagens global
-            await sessionRef.push({
-                user: userName,
-                text: msg,
-                timestamp: Date.now()
-            });
+            let timedOut = false;
+            const timeoutHandle = setTimeout(() => {
+                timedOut = true;
+                removeTyping(); stopTimeoutBar(); setLoading(false);
+                appendMessage("AntroAi", "Sem resposta em 30s. O servidor pode estar ocupado.", "warning");
+                if (currentListener) { currentListener.ref.off('value', currentListener.fn); currentListener = null; }
+            }, TIMEOUT_MS);
 
-            // 2. Envia para processamento da AntroAi
-            const taskRef = core.ref('queue').push();
-            await taskRef.set({ message: msg, status: "pending", user: userName });
+            try {
+                const ref = db.ref('queue').push();
+                await ref.set({ message: msg, api_key: key, status: "pending", time: Date.now() });
 
-            // 3. Aguarda resposta da IA e salva no log global
-            taskRef.on('value', async (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.status === "completed") {
-                    await sessionRef.push({
-                        user: "AntroAi",
-                        text: data.response,
-                        timestamp: Date.now()
-                    });
-                    taskRef.off();
-                    taskRef.remove();
-                }
-            });
+                const handler = (snapshot) => {
+                    if (timedOut) return;
+                    const data = snapshot.val();
+                    if (!data) return;
+                    if (data.status === "completed") {
+                        clearTimeout(timeoutHandle);
+                        removeTyping(); stopTimeoutBar(); setLoading(false);
+                        appendMessage("AntroAi", data.response);
+                        ref.off('value', handler); currentListener = null; ref.remove();
+                    } else if (data.status === "error") {
+                        clearTimeout(timeoutHandle);
+                        removeTyping(); stopTimeoutBar(); setLoading(false);
+                        appendMessage("AntroAi", data.error || "Erro desconhecido.", "error");
+                        ref.off('value', handler); currentListener = null;
+                    }
+                };
+
+                ref.on('value', handler);
+                currentListener = { ref, fn: handler };
+
+            } catch (e) {
+                clearTimeout(timeoutHandle);
+                removeTyping(); stopTimeoutBar(); setLoading(false);
+                appendMessage("AntroAi", "Falha ao enviar: " + e.message, "error");
+            }
         }
+
+        // ── SETTINGS ─────────────────────────────────────────────
+
+        function refreshApiStatus() {
+            const key = localStorage.getItem('antro_api_key');
+            const dot  = document.getElementById('api-dot');
+            const text = document.getElementById('api-status-text');
+            const sidebar = document.getElementById('api-status-sidebar');
+
+            if (key) {
+                const masked = key.slice(0, 8) + '••••••••••••••••' + key.slice(-4);
+                dot.classList.add('active');
+                text.classList.add('active');
+                text.textContent = masked;
+                sidebar.style.color = '#00cc66';
+                sidebar.textContent = 'API: ativa ✓';
+            } else {
+                dot.classList.remove('active');
+                text.classList.remove('active');
+                text.textContent = 'Nenhuma key configurada';
+                sidebar.style.color = '#330033';
+                sidebar.textContent = 'API: não configurada';
+            }
+        }
+
+        function openSettings() {
+            refreshApiStatus();
+            document.getElementById('modal-overlay').classList.add('open');
+        }
+
+        function closeSettings() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeSettings();
+        }
+
+        function goGetApi() {
+            window.location.href = 'getapi.html';
+        }
+
+        function clearKey() {
+            if (!confirm('Remover a API Key salva?')) return;
+            localStorage.removeItem('antro_api_key');
+            refreshApiStatus();
+        }
+
+        // ── UI ────────────────────────────────────────────────────
 
         function toggleMenu() {
             const active = document.getElementById('sidebar').classList.toggle('active');
@@ -206,21 +454,17 @@
         }
 
         function checkInput() {
-            const prompt = document.getElementById('prompt');
-            const send = document.getElementById('send-icon');
-            send.classList.toggle('active', prompt.value.length > 0);
+            document.getElementById('send-icon').classList.toggle('active', document.getElementById('prompt').value.length > 0 && !isLoading);
         }
 
         function newChat() {
-            // No modo global sincronizado, "New Chat" apenas limpa a visão local 
-            // ou você pode optar por limpar o banco de dados se for o admin.
             document.getElementById('chat-container').innerHTML = "";
             document.getElementById('lobby').style.display = 'block';
             if (window.innerWidth < 768) toggleMenu();
         }
 
         function logout() {
-            localStorage.clear();
+            localStorage.removeItem('is_logged');
             window.location.href = 'index.html';
         }
 
