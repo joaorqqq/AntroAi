@@ -22,12 +22,9 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg); color: var(--text);
             font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
+            height: 100vh; display: flex; overflow: hidden;
         }
 
         /* ── SIDEBAR ─────────────────────────────────────────────── */
@@ -83,7 +80,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Typing dots */
         .typing { display: inline-flex; gap: 5px; align-items: center; padding: 4px 0; }
         .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: tdot 0.9s ease infinite; }
         .typing span:nth-child(2) { animation-delay: 0.15s; }
@@ -131,49 +127,33 @@
         #modal-overlay.open { display: flex; }
 
         #settings-modal {
-            background: var(--sidebar);
-            border: 1px solid #440044;
-            border-radius: 20px;
-            padding: 30px;
-            width: 340px;
-            box-shadow: 0 0 40px rgba(255,0,64,0.12);
+            background: var(--sidebar); border: 1px solid #440044;
+            border-radius: 20px; padding: 30px; width: 320px;
+            box-shadow: 0 0 40px rgba(255,0,64,0.1);
             animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1);
         }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
         .modal-title {
             background: var(--ai-gradient);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-size: 18px; font-weight: bold; margin-bottom: 6px;
         }
-        .modal-subtitle {
-            font-size: 12px; color: var(--subtext); margin-bottom: 24px;
-        }
+        .modal-subtitle { font-size: 12px; color: var(--subtext); margin-bottom: 24px; }
 
-        .modal-label {
-            font-size: 10px; letter-spacing: 2px; color: var(--subtext);
-            text-transform: uppercase; margin-bottom: 8px; display: block;
-        }
-
-        .api-status-box {
-            background: #0d000d; border: 1px solid #330033;
+        .modal-info-box {
+            background: #0d000d; border: 1px solid #220022;
             border-radius: 12px; padding: 14px 16px;
-            margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+            font-size: 12px; color: var(--subtext);
+            line-height: 1.6; margin-bottom: 20px;
         }
-        .api-dot {
-            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-            background: #330033;
-        }
-        .api-dot.active { background: #00cc66; box-shadow: 0 0 6px #00cc66; }
-        .api-status-text { font-size: 12px; color: var(--subtext); font-family: 'Courier New', monospace; }
-        .api-status-text.active { color: #00cc66; }
+        .modal-info-box strong { color: #cc0033; }
 
         .modal-btn {
             width: 100%; background: var(--ai-gradient); color: #fff;
             border: none; padding: 13px; border-radius: 12px;
             font-size: 13px; font-weight: bold; letter-spacing: 1px;
-            cursor: pointer; transition: opacity 0.2s, transform 0.15s;
-            margin-bottom: 10px;
+            cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-bottom: 10px;
         }
         .modal-btn:hover { opacity: 0.88; transform: translateY(-1px); }
         .modal-btn:active { transform: scale(0.98); }
@@ -184,17 +164,6 @@
             font-size: 12px; cursor: pointer; transition: all 0.2s;
         }
         .modal-btn-ghost:hover { border-color: #550044; color: #fff; }
-
-        .modal-divider {
-            border: none; border-top: 1px solid #220022; margin: 16px 0;
-        }
-
-        .modal-danger {
-            width: 100%; background: transparent; color: #ff4444;
-            border: 1px solid #330011; padding: 11px; border-radius: 12px;
-            font-size: 12px; cursor: pointer; transition: all 0.2s;
-        }
-        .modal-danger:hover { background: rgba(255,0,0,0.08); border-color: #ff4444; }
     </style>
 </head>
 <body>
@@ -217,11 +186,10 @@
         </div>
         <div class="sidebar-item" onclick="newChat()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            Reset Session
+            New Chat
         </div>
 
         <div style="margin-top:auto; padding-top:20px; border-top:1px solid #220022;">
-            <div id="api-status-sidebar" style="font-size:11px; color:#330033; margin-bottom:12px; font-family:monospace;">API: não configurada</div>
             <div style="color:var(--accent); cursor:pointer; font-size:14px;" onclick="logout()">Sign Out</div>
         </div>
     </div>
@@ -230,23 +198,15 @@
     <div id="modal-overlay" onclick="handleOverlayClick(event)">
         <div id="settings-modal">
             <div class="modal-title">⚙ Settings</div>
-            <div class="modal-subtitle">Configurações da sua conta</div>
+            <div class="modal-subtitle">Configurações da conta</div>
 
-            <label class="modal-label">Status da API Key</label>
-            <div class="api-status-box">
-                <div class="api-dot" id="api-dot"></div>
-                <div class="api-status-text" id="api-status-text">Nenhuma key configurada</div>
+            <div class="modal-info-box">
+                Quer integrar a <strong>AntroGPT1</strong> no seu site?<br><br>
+                Gere sua API Key pessoal e use nossa API para embedar a IA em qualquer projeto.
             </div>
 
-            <button class="modal-btn" onclick="goGetApi()">🔑 Obter / Gerar API Key</button>
-
-            <hr class="modal-divider">
-
+            <button class="modal-btn" onclick="window.location.href='getapi.html'">🔑 Obter API Key</button>
             <button class="modal-btn-ghost" onclick="closeSettings()">Fechar</button>
-
-            <hr class="modal-divider">
-
-            <button class="modal-danger" onclick="clearKey()">Remover API Key</button>
         </div>
     </div>
 
@@ -282,7 +242,6 @@
 
         const userName = localStorage.getItem('antro_user') || 'User';
         document.getElementById('user-display').innerText = `Hello, ${userName}`;
-        refreshApiStatus();
 
         // ── HELPERS ──────────────────────────────────────────────
 
@@ -340,12 +299,6 @@
         async function triggerIA() {
             if (isLoading || !db) return;
 
-            const key = localStorage.getItem('antro_api_key');
-            if (!key) {
-                openSettings();
-                return;
-            }
-
             const input = document.getElementById('prompt');
             const msg = input.value.trim();
             if (!msg) return;
@@ -370,7 +323,7 @@
 
             try {
                 const ref = db.ref('queue').push();
-                await ref.set({ message: msg, api_key: key, status: "pending", time: Date.now() });
+                await ref.set({ message: msg, status: "pending", time: Date.now() });
 
                 const handler = (snapshot) => {
                     if (timedOut) return;
@@ -401,30 +354,7 @@
 
         // ── SETTINGS ─────────────────────────────────────────────
 
-        function refreshApiStatus() {
-            const key = localStorage.getItem('antro_api_key');
-            const dot  = document.getElementById('api-dot');
-            const text = document.getElementById('api-status-text');
-            const sidebar = document.getElementById('api-status-sidebar');
-
-            if (key) {
-                const masked = key.slice(0, 8) + '••••••••••••••••' + key.slice(-4);
-                dot.classList.add('active');
-                text.classList.add('active');
-                text.textContent = masked;
-                sidebar.style.color = '#00cc66';
-                sidebar.textContent = 'API: ativa ✓';
-            } else {
-                dot.classList.remove('active');
-                text.classList.remove('active');
-                text.textContent = 'Nenhuma key configurada';
-                sidebar.style.color = '#330033';
-                sidebar.textContent = 'API: não configurada';
-            }
-        }
-
         function openSettings() {
-            refreshApiStatus();
             document.getElementById('modal-overlay').classList.add('open');
         }
 
@@ -434,16 +364,6 @@
 
         function handleOverlayClick(e) {
             if (e.target === document.getElementById('modal-overlay')) closeSettings();
-        }
-
-        function goGetApi() {
-            window.location.href = 'getapi.html';
-        }
-
-        function clearKey() {
-            if (!confirm('Remover a API Key salva?')) return;
-            localStorage.removeItem('antro_api_key');
-            refreshApiStatus();
         }
 
         // ── UI ────────────────────────────────────────────────────
