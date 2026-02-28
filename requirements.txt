@@ -1,0 +1,4 @@
+requests
+wikipedia
+googlesearch-python
+beautifulsoup4
