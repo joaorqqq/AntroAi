@@ -4,391 +4,527 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AntroAi</title>
-
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
-
     <style>
         :root {
-            --bg: #0b000b;
-            --sidebar: #1a001a;
-            --accent: #ff0040;
-            --text: #ffffff;
-            --subtext: #884488;
-            --input-bg: #220022;
+            --bg: #0b000b; --sidebar: #1a001a; --accent: #ff0040;
+            --text: #ffffff; --subtext: #884488; --input-bg: #220022;
             --ai-gradient: linear-gradient(45deg, #ff0040, #7a00ff);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        body {
-            background-color: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-            height: 100vh; display: flex; overflow: hidden;
-        }
-
-        /* ── SIDEBAR ─────────────────────────────────────────────── */
-        #sidebar {
-            width: 280px; background: var(--sidebar); height: 100%;
-            position: fixed; left: -280px; z-index: 1000;
-            transition: 0.3s ease; display: flex; flex-direction: column; padding: 20px;
-            border-right: 1px solid #330033;
-        }
+        /* SIDEBAR */
+        #sidebar { width: 280px; background: var(--sidebar); height: 100%; position: fixed; left: -280px; z-index: 1000; transition: 0.3s ease; display: flex; flex-direction: column; padding: 20px; border-right: 1px solid #330033; }
         #sidebar.active { left: 0; }
-
         .menu-toggle { position: absolute; top: 20px; left: 20px; cursor: pointer; z-index: 500; }
-
-        .new-chat-sidebar {
-            background: #2a002a; padding: 12px; border-radius: 12px;
-            text-align: center; font-size: 14px; margin-top: 50px;
-            margin-bottom: 20px; cursor: pointer; border: 1px solid #440044;
-            font-weight: bold; color: #fff; transition: background 0.2s;
-        }
-        .new-chat-sidebar:hover { background: #3a003a; }
-
-        .sidebar-item {
-            padding: 11px 12px; cursor: pointer; border-radius: 8px;
-            font-size: 14px; color: var(--subtext);
-            display: flex; align-items: center; gap: 10px;
-            transition: background 0.2s, color 0.2s; margin-bottom: 4px;
-        }
+        .new-chat-btn { background: #2a002a; padding: 12px; border-radius: 12px; text-align: center; font-size: 14px; margin-top: 50px; margin-bottom: 14px; cursor: pointer; border: 1px solid #440044; font-weight: bold; color: #fff; transition: background 0.2s; }
+        .new-chat-btn:hover { background: #3a003a; }
+        .sidebar-item { padding: 10px 12px; cursor: pointer; border-radius: 8px; font-size: 14px; color: var(--subtext); display: flex; align-items: center; gap: 10px; transition: background 0.2s, color 0.2s; margin-bottom: 4px; }
         .sidebar-item:hover { background: #2a002a; color: #fff; }
+        #history-section { flex: 1; overflow-y: auto; margin-top: 10px; }
+        #history-section::-webkit-scrollbar { width: 2px; }
+        #history-section::-webkit-scrollbar-thumb { background: #330033; }
+        .history-label { font-size: 10px; color: #440044; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px; padding: 0 4px; }
+        .history-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; transition: all 0.2s; position: relative; }
+        .history-item:hover { background: #2a002a; border-color: #440044; }
+        .history-item.active { background: #2a002a; border-color: #660033; }
+        .history-item-title { font-size: 13px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 185px; }
+        .history-item-date { font-size: 10px; color: #440044; margin-top: 2px; }
+        .history-item-del { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #440044; font-size: 16px; opacity: 0; transition: opacity 0.2s; cursor: pointer; padding: 4px; }
+        .history-item:hover .history-item-del { opacity: 1; }
+        .history-item-del:hover { color: var(--accent); }
 
-        /* ── MAIN ────────────────────────────────────────────────── */
-        #main {
-            flex-grow: 1; display: flex; flex-direction: column;
-            padding: 20px; width: 100%; height: 100vh; position: relative;
-        }
+        /* MAIN */
+        #main { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; width: 100%; height: 100vh; position: relative; }
+        #chat-container { flex-grow: 1; overflow-y: auto; width: 100%; max-width: 800px; margin: 60px auto 140px auto; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
+        #chat-container::-webkit-scrollbar { width: 3px; }
+        #chat-container::-webkit-scrollbar-thumb { background: #330033; }
 
-        #chat-container {
-            flex-grow: 1; overflow-y: auto; width: 100%;
-            max-width: 800px; margin: 60px auto 140px auto;
-            display: flex; flex-direction: column; gap: 25px; padding: 10px;
-        }
-
-        /* ── MESSAGES ────────────────────────────────────────────── */
-        .message { margin-bottom: 5px; animation: fadeIn 0.3s ease; }
+        /* MESSAGES */
+        .message { animation: fadeIn 0.3s ease; }
         .user-label { color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px; font-size: 12px; }
-        .ai-label {
-            background: var(--ai-gradient);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-weight: bold; display: block; margin-bottom: 5px; font-size: 12px;
-        }
-        .msg-content { color: #e0e0e0; font-size: 16px; line-height: 1.6; word-wrap: break-word; }
-        .msg-content.error   { color: #ff4444; font-style: italic; }
+        .ai-label { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; display: block; margin-bottom: 5px; font-size: 12px; }
+        .msg-content { color: #e0e0e0; font-size: 15px; line-height: 1.7; word-wrap: break-word; }
+        .msg-content.error { color: #ff4444; font-style: italic; }
         .msg-content.warning { color: #ffcc00; font-style: italic; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Typewriter cursor */
+        .tw-cursor { display: inline-block; width: 2px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 0.7s infinite; }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
+        /* Waiting dots */
         .typing { display: inline-flex; gap: 5px; align-items: center; padding: 4px 0; }
         .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: tdot 0.9s ease infinite; }
         .typing span:nth-child(2) { animation-delay: 0.15s; }
         .typing span:nth-child(3) { animation-delay: 0.30s; }
         @keyframes tdot { 0%,80%,100% { transform: translateY(0); opacity: 0.3; } 40% { transform: translateY(-6px); opacity: 1; } }
 
-        /* ── LOBBY ───────────────────────────────────────────────── */
-        #lobby {
-            position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%); text-align: left; width: 90%; max-width: 550px;
-        }
-        .greeting     { font-size: 40px; font-weight: 600; letter-spacing: -1px; }
+        /* CODE BLOCKS */
+        .code-block { background: #0d000d; border: 1px solid #2a002a; border-radius: 12px; margin: 10px 0; overflow: hidden; font-family: 'Courier New', monospace; }
+        .code-header { background: #1a001a; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a002a; }
+        .code-lang { font-size: 12px; font-weight: bold; color: var(--subtext); letter-spacing: 0.5px; }
+        .code-copy { background: none; border: none; cursor: pointer; color: var(--subtext); font-size: 12px; display: flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 6px; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; }
+        .code-copy:hover { background: #2a002a; color: #fff; }
+        .code-copy.copied { color: #00cc66; }
+        .code-body { padding: 14px 16px; font-size: 13px; line-height: 1.6; color: #e0aaff; overflow-x: auto; white-space: pre; }
+
+        /* LOBBY */
+        #lobby { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: left; width: 90%; max-width: 550px; }
+        .greeting { font-size: 40px; font-weight: 600; letter-spacing: -1px; }
         .sub-greeting { font-size: 40px; font-weight: 600; color: #220022; }
 
-        /* ── BOTTOM UI ───────────────────────────────────────────── */
-        .bottom-ui {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 700px; background: var(--input-bg);
-            border-radius: 24px; padding: 12px 20px; border: 1px solid #440044;
-            display: flex; flex-direction: column; gap: 10px; z-index: 100;
-        }
-
+        /* BOTTOM UI */
+        .bottom-ui { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 700px; background: var(--input-bg); border-radius: 24px; padding: 12px 20px; border: 1px solid #440044; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
         #timeout-bar { display: none; height: 2px; background: #330033; border-radius: 2px; overflow: hidden; }
         #timeout-bar.active { display: block; }
         #timeout-bar-fill { height: 100%; width: 100%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: drain 30s linear forwards; }
         @keyframes drain { from { width: 100%; } to { width: 0%; } }
-
         .input-row { display: flex; align-items: center; width: 100%; gap: 12px; }
         #prompt { background: transparent; border: none; color: white; flex-grow: 1; padding: 5px; font-size: 16px; outline: none; }
         #prompt:disabled { opacity: 0.5; }
-
         .svg-icon { width: 24px; height: 24px; fill: var(--subtext); cursor: pointer; transition: 0.2s; flex-shrink: 0; }
         .svg-icon:hover { fill: #fff; }
         .send-btn { fill: #330033; }
         .send-btn.active { fill: var(--accent); }
-
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 900; }
 
-        /* ── SETTINGS MODAL ──────────────────────────────────────── */
-        #modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.75); z-index: 1500;
-            align-items: center; justify-content: center;
-        }
+        /* SETTINGS MODAL */
+        #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1500; align-items: center; justify-content: center; padding: 20px; }
         #modal-overlay.open { display: flex; }
-
-        #settings-modal {
-            background: var(--sidebar); border: 1px solid #440044;
-            border-radius: 20px; padding: 30px; width: 320px;
-            box-shadow: 0 0 40px rgba(255,0,64,0.1);
-            animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1);
-        }
+        #settings-modal { background: var(--sidebar); border: 1px solid #440044; border-radius: 20px; width: 100%; max-width: 360px; box-shadow: 0 0 40px rgba(255,0,64,0.1); animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1); overflow: hidden; }
         @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-header { padding: 22px 24px 0; }
+        .modal-title { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 18px; font-weight: bold; margin-bottom: 16px; }
+        .modal-tabs { display: flex; border-bottom: 1px solid #2a002a; padding: 0 24px; }
+        .modal-tab { padding: 10px 12px; font-size: 12px; font-weight: bold; color: var(--subtext); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.5px; margin-bottom: -1px; }
+        .modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .modal-tab-content { display: none; padding: 20px 24px 24px; }
+        .modal-tab-content.active { display: block; }
 
-        .modal-title {
-            background: var(--ai-gradient);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-size: 18px; font-weight: bold; margin-bottom: 6px;
-        }
-        .modal-subtitle { font-size: 12px; color: var(--subtext); margin-bottom: 24px; }
+        /* Tab Lembranças */
+        .memory-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 180px; overflow-y: auto; }
+        .memory-list::-webkit-scrollbar { width: 2px; }
+        .memory-list::-webkit-scrollbar-thumb { background: #330033; }
+        .memory-item { background: #0d000d; border: 1px solid #220022; border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #ccc; line-height: 1.5; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .memory-del { color: #440044; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: color 0.2s; line-height: 1; }
+        .memory-del:hover { color: var(--accent); }
+        .memory-empty { font-size: 12px; color: #440044; text-align: center; padding: 20px 0; }
+        .memory-input-row { display: flex; gap: 8px; }
+        .memory-input { flex: 1; background: #0d000d; border: 1px solid #2a002a; border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; transition: border-color 0.2s; font-family: 'Segoe UI', sans-serif; }
+        .memory-input:focus { border-color: #660033; }
+        .memory-add-btn { background: var(--ai-gradient); color: #fff; border: none; border-radius: 10px; padding: 0 16px; cursor: pointer; font-size: 20px; transition: opacity 0.2s; }
+        .memory-add-btn:hover { opacity: 0.85; }
 
-        .modal-info-box {
-            background: #0d000d; border: 1px solid #220022;
-            border-radius: 12px; padding: 14px 16px;
-            font-size: 12px; color: var(--subtext);
-            line-height: 1.6; margin-bottom: 20px;
-        }
-        .modal-info-box strong { color: #cc0033; }
+        /* Tab API */
+        .api-info-box { background: #0d000d; border: 1px solid #220022; border-radius: 12px; padding: 14px; font-size: 12px; color: var(--subtext); line-height: 1.6; margin-bottom: 16px; }
+        .api-info-box strong { color: #cc0033; }
 
-        .modal-btn {
-            width: 100%; background: var(--ai-gradient); color: #fff;
-            border: none; padding: 13px; border-radius: 12px;
-            font-size: 13px; font-weight: bold; letter-spacing: 1px;
-            cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-bottom: 10px;
-        }
+        /* Tab Config */
+        .config-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #1a001a; }
+        .config-row:last-of-type { border-bottom: none; }
+        .config-label { font-size: 13px; color: #ccc; }
+        .config-sub { font-size: 11px; color: var(--subtext); margin-top: 2px; }
+        .toggle { width: 40px; height: 22px; background: #2a002a; border-radius: 11px; cursor: pointer; position: relative; transition: background 0.25s; flex-shrink: 0; }
+        .toggle.on { background: var(--accent); }
+        .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left 0.25s; }
+        .toggle.on::after { left: 21px; }
+
+        /* Shared buttons */
+        .modal-btn { width: 100%; background: var(--ai-gradient); color: #fff; border: none; padding: 13px; border-radius: 12px; font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; }
         .modal-btn:hover { opacity: 0.88; transform: translateY(-1px); }
         .modal-btn:active { transform: scale(0.98); }
-
-        .modal-btn-ghost {
-            width: 100%; background: transparent; color: var(--subtext);
-            border: 1px solid #330033; padding: 11px; border-radius: 12px;
-            font-size: 12px; cursor: pointer; transition: all 0.2s;
-        }
+        .modal-btn-ghost { width: 100%; background: transparent; color: var(--subtext); border: 1px solid #330033; padding: 11px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'Segoe UI', sans-serif; }
         .modal-btn-ghost:hover { border-color: #550044; color: #fff; }
+        .modal-btn-danger { width: 100%; background: transparent; color: #ff4444; border: 1px solid #330011; padding: 11px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: all 0.2s; margin-top: 10px; font-family: 'Segoe UI', sans-serif; }
+        .modal-btn-danger:hover { background: rgba(255,0,0,0.08); border-color: #ff4444; }
     </style>
 </head>
 <body>
 
-    <div class="menu-toggle" onclick="toggleMenu()">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+<div class="menu-toggle" onclick="toggleMenu()">
+    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+</div>
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<div id="sidebar">
+    <div class="new-chat-btn" onclick="newChat()">+ New Chat</div>
+    <p style="color:var(--accent); font-weight:bold; margin-bottom:8px; font-size:18px;">AntroAi</p>
+    <div class="sidebar-item" onclick="openSettings()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+        Settings
     </div>
-
-    <div id="overlay" onclick="toggleMenu()"></div>
-
-    <div id="sidebar">
-        <div class="new-chat-sidebar" onclick="newChat()">+ New Chat</div>
-        <p style="color:var(--accent); font-weight:bold; margin-bottom:20px; font-size:18px;">AntroAi</p>
-
-        <div style="color:#440044; font-size:11px; font-weight:bold; letter-spacing:1px; margin-bottom:10px;">MENU</div>
-
-        <div class="sidebar-item" onclick="openSettings()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-            Settings
-        </div>
-        <div class="sidebar-item" onclick="newChat()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            New Chat
-        </div>
-
-        <div style="margin-top:auto; padding-top:20px; border-top:1px solid #220022;">
-            <div style="color:var(--accent); cursor:pointer; font-size:14px;" onclick="logout()">Sign Out</div>
-        </div>
+    <div id="history-section">
+        <div class="history-label">CONVERSAS</div>
+        <div id="history-list"></div>
     </div>
+    <div style="margin-top:auto; padding-top:16px; border-top:1px solid #220022;">
+        <div style="color:var(--accent); cursor:pointer; font-size:14px;" onclick="logout()">Sign Out</div>
+    </div>
+</div>
 
-    <!-- Settings Modal -->
-    <div id="modal-overlay" onclick="handleOverlayClick(event)">
-        <div id="settings-modal">
+<!-- Settings Modal -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="settings-modal">
+        <div class="modal-header">
             <div class="modal-title">⚙ Settings</div>
-            <div class="modal-subtitle">Configurações da conta</div>
+        </div>
+        <div class="modal-tabs">
+            <div class="modal-tab active" onclick="switchTab('memorias')">Lembranças</div>
+            <div class="modal-tab" onclick="switchTab('api')">API</div>
+            <div class="modal-tab" onclick="switchTab('config')">Configurações</div>
+        </div>
 
-            <div class="modal-info-box">
-                Quer integrar a <strong>AntroGPT1</strong> no seu site?<br><br>
-                Gere sua API Key pessoal e use nossa API para embedar a IA em qualquer projeto.
+        <div class="modal-tab-content active" id="tab-memorias">
+            <div class="memory-list" id="memory-list"></div>
+            <div class="memory-input-row">
+                <input class="memory-input" id="memory-input" placeholder="Ex: Meu nome é João..." onkeydown="if(event.key==='Enter') addMemory()">
+                <button class="memory-add-btn" onclick="addMemory()">+</button>
             </div>
+        </div>
 
+        <div class="modal-tab-content" id="tab-api">
+            <div class="api-info-box">
+                Integre a <strong>AntroGPT1</strong> no seu site.<br><br>
+                Gere uma API Key pessoal para usar nossa IA em qualquer projeto externo.
+            </div>
             <button class="modal-btn" onclick="window.location.href='getapi.html'">🔑 Obter API Key</button>
             <button class="modal-btn-ghost" onclick="closeSettings()">Fechar</button>
         </div>
-    </div>
 
-    <div id="main">
-        <div id="lobby">
-            <h1 class="greeting" id="user-display">Hello, User</h1>
-            <h1 class="sub-greeting">How can I help you today?</h1>
-        </div>
-
-        <div id="chat-container"></div>
-
-        <div class="bottom-ui">
-            <div id="timeout-bar"><div id="timeout-bar-fill"></div></div>
-            <div class="input-row">
-                <input type="text" id="prompt" placeholder="Ask anything to AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
-                <svg id="send-icon" class="svg-icon send-btn" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        <div class="modal-tab-content" id="tab-config">
+            <div class="config-row">
+                <div>
+                    <div class="config-label">Auto-save de conversas</div>
+                    <div class="config-sub">Salva cada chat automaticamente</div>
+                </div>
+                <div class="toggle on" id="toggle-autosave" onclick="toggleConfig('autosave')"></div>
             </div>
+            <div class="config-row">
+                <div>
+                    <div class="config-label">Animação de digitação</div>
+                    <div class="config-sub">IA digita letra por letra</div>
+                </div>
+                <div class="toggle on" id="toggle-typewriter" onclick="toggleConfig('typewriter')"></div>
+            </div>
+            <button class="modal-btn-danger" onclick="clearAllChats()">🗑 Apagar todas as conversas</button>
         </div>
     </div>
+</div>
 
-    <script>
-        const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
-        const TIMEOUT_MS = 30000;
+<div id="main">
+    <div id="lobby">
+        <h1 class="greeting" id="user-display">Hello, User</h1>
+        <h1 class="sub-greeting">How can I help you today?</h1>
+    </div>
+    <div id="chat-container"></div>
+    <div class="bottom-ui">
+        <div id="timeout-bar"><div id="timeout-bar-fill"></div></div>
+        <div class="input-row">
+            <input type="text" id="prompt" placeholder="Ask anything to AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
+            <svg id="send-icon" class="svg-icon send-btn" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </div>
+    </div>
+</div>
 
-        let db = null, currentListener = null, isLoading = false;
+<script>
+const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
+const TIMEOUT_MS = 30000;
+const userName = localStorage.getItem('antro_user') || 'User';
 
-        try {
-            firebase.initializeApp({ databaseURL: atob(_0xdb) });
-            db = firebase.database();
-        } catch (e) {
-            setTimeout(() => appendMessage("AntroAi", "Firebase init error: " + e.message, "error"), 100);
-        }
+let db = null, currentListener = null, isLoading = false;
+let currentChatId = null, currentMessages = [];
+let config = JSON.parse(localStorage.getItem('antro_config') || '{"autosave":true,"typewriter":true}');
 
-        const userName = localStorage.getItem('antro_user') || 'User';
-        document.getElementById('user-display').innerText = `Hello, ${userName}`;
+if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
 
-        // ── HELPERS ──────────────────────────────────────────────
+try {
+    firebase.initializeApp({ databaseURL: atob(_0xdb) });
+    db = firebase.database();
+} catch(e) { setTimeout(() => appendMessage("AntroAi","Firebase error: "+e.message,"error"), 100); }
 
-        function escapeHTML(str) {
-            const d = document.createElement('div');
-            d.textContent = str;
-            return d.innerHTML;
-        }
+document.getElementById('user-display').innerText = 'Hello, ' + userName;
+loadHistory();
+renderMemories();
+applyConfig();
 
-        function appendMessage(sender, text, type = '') {
-            const container = document.getElementById('chat-container');
-            const isAI = sender === "AntroAi";
-            const div = document.createElement('div');
-            div.className = 'message';
-            div.innerHTML = `
-                <span class="${isAI ? 'ai-label' : 'user-label'}">${escapeHTML(sender.toUpperCase())}</span>
-                <div class="msg-content ${type}">${escapeHTML(text)}</div>
-            `;
-            container.appendChild(div);
+// ── HELPERS ──────────────────────────────────────────────────────
+function escapeHTML(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+
+function parseMessage(text) {
+    const codeRegex = /```(\w*)\n?([\s\S]*?)```/g;
+    let result = '', lastIndex = 0, match;
+    while ((match = codeRegex.exec(text)) !== null) {
+        const before = text.slice(lastIndex, match.index);
+        if (before) result += escapeHTML(before).replace(/\n/g,'<br>');
+        const lang = match[1] || 'código';
+        const code = escapeHTML(match[2]);
+        const id = 'cb' + Math.random().toString(36).slice(2,8);
+        result += `<div class="code-block"><div class="code-header"><span class="code-lang">${escapeHTML(lang)}</span><button class="code-copy" id="${id}" onclick="copyCode('${id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copiar</button></div><div class="code-body" id="body_${id}">${code}</div></div>`;
+        lastIndex = match.index + match[0].length;
+    }
+    const rest = text.slice(lastIndex);
+    if (rest) result += escapeHTML(rest).replace(/\n/g,'<br>');
+    return result || escapeHTML(text).replace(/\n/g,'<br>');
+}
+
+function copyCode(id) {
+    const body = document.getElementById('body_'+id);
+    const btn  = document.getElementById(id);
+    if (!body||!btn) return;
+    navigator.clipboard.writeText(body.innerText).catch(()=>{});
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Copiado!';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copiar'; }, 2000);
+}
+
+// ── APPEND MESSAGE ────────────────────────────────────────────────
+function appendMessage(sender, text, type='', animate=false) {
+    const container = document.getElementById('chat-container');
+    const isAI = sender === "AntroAi";
+    const div = document.createElement('div');
+    div.className = 'message';
+    div.innerHTML = `<span class="${isAI?'ai-label':'user-label'}">${escapeHTML(sender.toUpperCase())}</span><div class="msg-content${type?' '+type:''}"></div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    const el = div.querySelector('.msg-content');
+    if (isAI && animate && config.typewriter && !type && !text.includes('```')) {
+        typewriter(el, text, container);
+    } else {
+        el.innerHTML = parseMessage(text);
+    }
+    return div;
+}
+
+// ── TYPEWRITER ────────────────────────────────────────────────────
+function typewriter(el, fullText, container) {
+    let i = 0;
+    el.innerHTML = '<span class="tw-cursor"></span>';
+    function tick() {
+        if (i < fullText.length) {
+            el.innerHTML = escapeHTML(fullText.slice(0, ++i)) + '<span class="tw-cursor"></span>';
             container.scrollTop = container.scrollHeight;
+            setTimeout(tick, 16);
+        } else {
+            el.innerHTML = parseMessage(fullText);
         }
+    }
+    setTimeout(tick, 16);
+}
 
-        function showTyping() {
-            removeTyping();
-            const container = document.getElementById('chat-container');
-            const div = document.createElement('div');
-            div.className = 'message'; div.id = 'typing-msg';
-            div.innerHTML = `<span class="ai-label">ANTROAI</span><div class="msg-content"><span class="typing"><span></span><span></span><span></span></span></div>`;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
+// ── TYPING INDICATOR ──────────────────────────────────────────────
+function showTyping() {
+    removeTyping();
+    const c = document.getElementById('chat-container');
+    const d = document.createElement('div');
+    d.className='message'; d.id='typing-msg';
+    d.innerHTML='<span class="ai-label">ANTROAI</span><div class="msg-content"><span class="typing"><span></span><span></span><span></span></span></div>';
+    c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function removeTyping() { document.getElementById('typing-msg')?.remove(); }
 
-        function removeTyping() { document.getElementById('typing-msg')?.remove(); }
+// ── LOADING ───────────────────────────────────────────────────────
+function setLoading(on) {
+    isLoading = on;
+    document.getElementById('prompt').disabled = on;
+    if (on) document.getElementById('send-icon').classList.remove('active');
+    else { checkInput(); document.getElementById('prompt').focus(); }
+}
+function startTimeoutBar() {
+    const bar = document.getElementById('timeout-bar');
+    const oldFill = document.getElementById('timeout-bar-fill');
+    const nf = oldFill.cloneNode(true);
+    bar.replaceChild(nf, oldFill);
+    void nf.offsetWidth;
+    bar.classList.add('active');
+}
+function stopTimeoutBar() { document.getElementById('timeout-bar').classList.remove('active'); }
 
-        function setLoading(on) {
-            isLoading = on;
-            document.getElementById('prompt').disabled = on;
-            if (on) document.getElementById('send-icon').classList.remove('active');
-            else { checkInput(); document.getElementById('prompt').focus(); }
-        }
+// ── CONVERSATIONS ─────────────────────────────────────────────────
+function getAllChats() { return JSON.parse(localStorage.getItem('antro_chats')||'{}'); }
+function saveChats(c) { localStorage.setItem('antro_chats', JSON.stringify(c)); }
 
-        function startTimeoutBar() {
-            const bar = document.getElementById('timeout-bar');
-            const oldFill = document.getElementById('timeout-bar-fill');
-            const newFill = oldFill.cloneNode(true);
-            bar.replaceChild(newFill, oldFill);
-            void newFill.offsetWidth;
-            bar.classList.add('active');
-        }
+function saveCurrentChat() {
+    if (!config.autosave || !currentChatId || currentMessages.length===0) return;
+    const chats = getAllChats();
+    chats[currentChatId] = {
+        id: currentChatId,
+        title: currentMessages[0].text.slice(0,40),
+        messages: currentMessages,
+        updatedAt: Date.now()
+    };
+    saveChats(chats);
+    loadHistory();
+}
 
-        function stopTimeoutBar() { document.getElementById('timeout-bar').classList.remove('active'); }
+function loadHistory() {
+    const chats = getAllChats();
+    const list  = document.getElementById('history-list');
+    const sorted = Object.values(chats).sort((a,b)=>b.updatedAt-a.updatedAt);
+    if (!sorted.length) { list.innerHTML='<div style="font-size:12px;color:#440044;padding:6px 4px;">Nenhuma conversa.</div>'; return; }
+    list.innerHTML = sorted.map(c=>`
+        <div class="history-item ${c.id===currentChatId?'active':''}" onclick="loadChat('${c.id}')">
+            <div class="history-item-title">${escapeHTML(c.title)}</div>
+            <div class="history-item-date">${timeAgo(c.updatedAt)}</div>
+            <span class="history-item-del" onclick="deleteChat(event,'${c.id}')">×</span>
+        </div>`).join('');
+}
 
-        // ── SEND ─────────────────────────────────────────────────
+function loadChat(id) {
+    const chat = getAllChats()[id];
+    if (!chat) return;
+    currentChatId = id; currentMessages = chat.messages||[];
+    const c = document.getElementById('chat-container');
+    c.innerHTML='';
+    document.getElementById('lobby').style.display='none';
+    currentMessages.forEach(m => appendMessage(m.sender, m.text, m.type||'', false));
+    loadHistory();
+    if (window.innerWidth<768) toggleMenu();
+}
 
-        async function triggerIA() {
-            if (isLoading || !db) return;
+function deleteChat(e, id) {
+    e.stopPropagation();
+    const chats = getAllChats();
+    delete chats[id];
+    saveChats(chats);
+    if (currentChatId===id) newChat(); else loadHistory();
+}
 
-            const input = document.getElementById('prompt');
-            const msg = input.value.trim();
-            if (!msg) return;
+function clearAllChats() {
+    if (!confirm('Apagar todas as conversas?')) return;
+    localStorage.removeItem('antro_chats');
+    newChat(); closeSettings();
+}
 
-            if (currentListener) { currentListener.ref.off('value', currentListener.fn); currentListener = null; }
+function timeAgo(ts) {
+    const d=Date.now()-ts;
+    if(d<60000) return 'agora';
+    if(d<3600000) return Math.floor(d/60000)+'m atrás';
+    if(d<86400000) return Math.floor(d/3600000)+'h atrás';
+    return Math.floor(d/86400000)+'d atrás';
+}
 
-            document.getElementById('lobby').style.display = 'none';
-            appendMessage(userName, msg);
-            input.value = "";
-            checkInput();
-            setLoading(true);
-            showTyping();
-            startTimeoutBar();
+// ── SEND ──────────────────────────────────────────────────────────
+async function triggerIA() {
+    if (isLoading||!db) return;
+    const input = document.getElementById('prompt');
+    const msg = input.value.trim();
+    if (!msg) return;
+    if (currentListener) { currentListener.ref.off('value',currentListener.fn); currentListener=null; }
+    if (!currentChatId) currentChatId = 'chat_'+Date.now();
+    document.getElementById('lobby').style.display='none';
+    appendMessage(userName, msg, '', false);
+    currentMessages.push({sender:userName, text:msg, time:Date.now()});
+    input.value=''; checkInput(); setLoading(true); showTyping(); startTimeoutBar();
 
-            let timedOut = false;
-            const timeoutHandle = setTimeout(() => {
-                timedOut = true;
-                removeTyping(); stopTimeoutBar(); setLoading(false);
-                appendMessage("AntroAi", "Sem resposta em 30s. O servidor pode estar ocupado.", "warning");
-                if (currentListener) { currentListener.ref.off('value', currentListener.fn); currentListener = null; }
-            }, TIMEOUT_MS);
+    let timedOut=false;
+    const th=setTimeout(()=>{
+        timedOut=true; removeTyping(); stopTimeoutBar(); setLoading(false);
+        const w="Sem resposta em 30s. O servidor pode estar ocupado.";
+        appendMessage("AntroAi",w,"warning",false);
+        currentMessages.push({sender:"AntroAi",text:w,type:"warning",time:Date.now()});
+        saveCurrentChat();
+        if(currentListener){currentListener.ref.off('value',currentListener.fn);currentListener=null;}
+    }, TIMEOUT_MS);
 
-            try {
-                const ref = db.ref('queue').push();
-                await ref.set({ message: msg, status: "pending", time: Date.now() });
-
-                const handler = (snapshot) => {
-                    if (timedOut) return;
-                    const data = snapshot.val();
-                    if (!data) return;
-                    if (data.status === "completed") {
-                        clearTimeout(timeoutHandle);
-                        removeTyping(); stopTimeoutBar(); setLoading(false);
-                        appendMessage("AntroAi", data.response);
-                        ref.off('value', handler); currentListener = null; ref.remove();
-                    } else if (data.status === "error") {
-                        clearTimeout(timeoutHandle);
-                        removeTyping(); stopTimeoutBar(); setLoading(false);
-                        appendMessage("AntroAi", data.error || "Erro desconhecido.", "error");
-                        ref.off('value', handler); currentListener = null;
-                    }
-                };
-
-                ref.on('value', handler);
-                currentListener = { ref, fn: handler };
-
-            } catch (e) {
-                clearTimeout(timeoutHandle);
-                removeTyping(); stopTimeoutBar(); setLoading(false);
-                appendMessage("AntroAi", "Falha ao enviar: " + e.message, "error");
+    try {
+        const ref = db.ref('queue').push();
+        await ref.set({message:msg, status:"pending", time:Date.now()});
+        const handler=(snapshot)=>{
+            if(timedOut) return;
+            const data=snapshot.val();
+            if(!data) return;
+            if(data.status==="completed"){
+                clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+                appendMessage("AntroAi", data.response, '', true);
+                currentMessages.push({sender:"AntroAi",text:data.response,time:Date.now()});
+                saveCurrentChat();
+                ref.off('value',handler); currentListener=null; ref.remove();
+            } else if(data.status==="error"){
+                clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+                const err=data.error||"Erro desconhecido.";
+                appendMessage("AntroAi",err,"error",false);
+                currentMessages.push({sender:"AntroAi",text:err,type:"error",time:Date.now()});
+                saveCurrentChat();
+                ref.off('value',handler); currentListener=null;
             }
-        }
+        };
+        ref.on('value',handler);
+        currentListener={ref,fn:handler};
+    } catch(e) {
+        clearTimeout(th); removeTyping(); stopTimeoutBar(); setLoading(false);
+        appendMessage("AntroAi","Falha ao enviar: "+e.message,"error",false);
+    }
+}
 
-        // ── SETTINGS ─────────────────────────────────────────────
+// ── MEMORIES ──────────────────────────────────────────────────────
+function getMemories() { return JSON.parse(localStorage.getItem('antro_memories')||'[]'); }
+function renderMemories() {
+    const mems=getMemories();
+    const list=document.getElementById('memory-list');
+    if(!mems.length){list.innerHTML='<div class="memory-empty">Nenhuma lembrança ainda.</div>';return;}
+    list.innerHTML=mems.map((m,i)=>`<div class="memory-item"><span>${escapeHTML(m)}</span><span class="memory-del" onclick="deleteMemory(${i})">×</span></div>`).join('');
+}
+function addMemory() {
+    const input=document.getElementById('memory-input');
+    const val=input.value.trim(); if(!val) return;
+    const mems=getMemories(); mems.push(val);
+    localStorage.setItem('antro_memories',JSON.stringify(mems));
+    input.value=''; renderMemories();
+}
+function deleteMemory(i) {
+    const mems=getMemories(); mems.splice(i,1);
+    localStorage.setItem('antro_memories',JSON.stringify(mems));
+    renderMemories();
+}
 
-        function openSettings() {
-            document.getElementById('modal-overlay').classList.add('open');
-        }
+// ── CONFIG ────────────────────────────────────────────────────────
+function applyConfig() {
+    document.getElementById('toggle-autosave').classList.toggle('on',config.autosave);
+    document.getElementById('toggle-typewriter').classList.toggle('on',config.typewriter);
+}
+function toggleConfig(key) {
+    config[key]=!config[key];
+    localStorage.setItem('antro_config',JSON.stringify(config));
+    applyConfig();
+}
 
-        function closeSettings() {
-            document.getElementById('modal-overlay').classList.remove('open');
-        }
+// ── SETTINGS ──────────────────────────────────────────────────────
+function switchTab(tab) {
+    const tabs=['memorias','api','config'];
+    document.querySelectorAll('.modal-tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
+    document.querySelectorAll('.modal-tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(tab==='memorias') renderMemories();
+}
+function openSettings() { document.getElementById('modal-overlay').classList.add('open'); switchTab('memorias'); }
+function closeSettings() { document.getElementById('modal-overlay').classList.remove('open'); }
+function handleOverlayClick(e) { if(e.target===document.getElementById('modal-overlay')) closeSettings(); }
 
-        function handleOverlayClick(e) {
-            if (e.target === document.getElementById('modal-overlay')) closeSettings();
-        }
-
-        // ── UI ────────────────────────────────────────────────────
-
-        function toggleMenu() {
-            const active = document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').style.display = active ? 'block' : 'none';
-        }
-
-        function checkInput() {
-            document.getElementById('send-icon').classList.toggle('active', document.getElementById('prompt').value.length > 0 && !isLoading);
-        }
-
-        function newChat() {
-            document.getElementById('chat-container').innerHTML = "";
-            document.getElementById('lobby').style.display = 'block';
-            if (window.innerWidth < 768) toggleMenu();
-        }
-
-        function logout() {
-            localStorage.removeItem('is_logged');
-            window.location.href = 'index.html';
-        }
-
-        if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
-    </script>
+// ── UI ────────────────────────────────────────────────────────────
+function toggleMenu() {
+    const active=document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('overlay').style.display=active?'block':'none';
+}
+function checkInput() {
+    document.getElementById('send-icon').classList.toggle('active',document.getElementById('prompt').value.length>0&&!isLoading);
+}
+function newChat() {
+    saveCurrentChat(); currentChatId=null; currentMessages=[];
+    document.getElementById('chat-container').innerHTML='';
+    document.getElementById('lobby').style.display='block';
+    loadHistory();
+    if(window.innerWidth<768) toggleMenu();
+}
+function logout() {
+    saveCurrentChat(); localStorage.removeItem('is_logged'); window.location.href='index.html';
+}
+</script>
 </body>
 </html>
