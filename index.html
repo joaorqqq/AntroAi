@@ -2,72 +2,70 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AntroAi | Entrar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntroAi | Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
     <style>
-        :root { --bg:#0b000b; --accent:#ff0040; --ai-gradient:linear-gradient(45deg,#ff0040,#7a00ff); --card:#130013; --border:#2a002a; --input-bg:#1a001a; --text:#fff; --subtext:#664466; }
-        * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-        body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; animation:drift 8s ease-in-out infinite alternate; }
-        .orb-1 { width:350px; height:350px; background:radial-gradient(circle,rgba(122,0,255,0.18) 0%,transparent 70%); top:-80px; right:-80px; }
-        .orb-2 { width:300px; height:300px; background:radial-gradient(circle,rgba(255,0,64,0.12) 0%,transparent 70%); bottom:-60px; left:-60px; animation-delay:-4s; }
-        @keyframes drift { from{transform:scale(1) translateY(0);} to{transform:scale(1.1) translateY(-20px);} }
+        :root { --bg:#0b000b; --card:#130013; --accent:#ff0040; --border:#2a002a; --subtext:#884488; --ai-gradient:linear-gradient(45deg,#ff0040,#7a00ff); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { background:var(--bg); color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; padding:30px 20px; }
 
-        .card { position:relative; z-index:10; background:var(--card); border:1px solid var(--border); border-radius:28px; padding:40px 36px; width:360px; box-shadow:0 0 60px rgba(122,0,255,0.1); animation:slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-        @keyframes slideUp { from{opacity:0;transform:translateY(30px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+        .admin-header { text-align:center; margin-bottom:36px; }
+        .admin-title { font-size:28px; font-weight:800; }
+        .admin-title span { background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .admin-sub { font-size:12px; color:var(--subtext); margin-top:6px; letter-spacing:2px; }
 
-        .logo { text-align:center; margin-bottom:26px; }
-        .logo-text { font-size:26px; font-weight:800; }
-        .logo-text .grad { background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-        .logo-sub { font-family:'DM Mono',monospace; font-size:10px; color:var(--subtext); letter-spacing:3px; margin-top:4px; text-transform:uppercase; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; max-width:900px; margin:0 auto; }
 
-        .tabs { display:flex; background:var(--input-bg); border-radius:14px; padding:4px; margin-bottom:20px; border:1px solid var(--border); }
-        .tab { flex:1; text-align:center; padding:9px; border-radius:10px; cursor:pointer; font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--subtext); transition:all 0.25s; user-select:none; }
-        .tab.active { background:var(--border); color:var(--text); }
+        .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px; }
+        .card-title { font-size:14px; font-weight:bold; color:var(--accent); margin-bottom:18px; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
 
-        .btn-google { width:100%; background:#fff; color:#3c3c3c; border:none; padding:13px 18px; border-radius:14px; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:16px; box-shadow:0 2px 12px rgba(0,0,0,0.3); }
-        .btn-google:hover { background:#f0f0f0; transform:translateY(-1px); }
+        /* Toggle switch */
+        .big-toggle { width:56px; height:30px; background:#2a002a; border-radius:15px; cursor:pointer; position:relative; transition:background 0.25s; flex-shrink:0; }
+        .big-toggle.on { background:var(--accent); }
+        .big-toggle::after { content:''; position:absolute; top:4px; left:4px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left 0.25s; }
+        .big-toggle.on::after { left:30px; }
 
-        .divider { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
-        .divider-line { flex:1; height:1px; background:var(--border); }
-        .divider-text { font-family:'DM Mono',monospace; font-size:10px; color:var(--subtext); letter-spacing:2px; }
+        .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .toggle-label { font-size:14px; color:#ccc; }
+        .toggle-sub { font-size:11px; color:var(--subtext); margin-top:3px; }
 
-        .form { display:flex; flex-direction:column; gap:10px; }
-        .hidden { display:none !important; }
-        .input-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--subtext); text-transform:uppercase; margin-bottom:5px; display:block; }
-        input { width:100%; background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:13px 16px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; outline:none; transition:border-color 0.2s; }
-        input::placeholder { color:#3a003a; }
-        input:focus { border-color:#440044; }
-        input.field-ok  { border-color:#00cc66; }
-        input.field-err { border-color:var(--accent); }
+        input[type=text], textarea {
+            width:100%; background:#0d000d; border:1px solid #2a002a;
+            border-radius:10px; padding:11px 14px; color:#fff;
+            font-size:13px; outline:none; font-family:'Segoe UI',sans-serif;
+            transition:border-color 0.2s;
+        }
+        input[type=text]:focus, textarea:focus { border-color:#660033; }
+        textarea { resize:vertical; min-height:80px; }
 
-        .field-hint { font-family:'DM Mono',monospace; font-size:10px; min-height:14px; margin-top:3px; padding-left:4px; }
-        .field-hint.ok  { color:#00cc66; }
-        .field-hint.err { color:var(--accent); }
+        .btn { background:var(--ai-gradient); color:#fff; border:none; padding:11px 18px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; transition:opacity 0.2s; margin-top:10px; width:100%; }
+        .btn:hover { opacity:0.85; }
+        .btn-red { background:transparent; border:1px solid #660011; color:#ff4444; }
+        .btn-red:hover { background:rgba(255,0,0,0.08); }
+        .btn-ghost { background:transparent; border:1px solid #330033; color:var(--subtext); }
+        .btn-ghost:hover { border-color:#550044; color:#fff; }
 
-        .error-msg { font-family:'DM Mono',monospace; font-size:11px; color:var(--accent); text-align:center; min-height:14px; }
-        @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
-        .shake { animation:shake 0.3s ease; }
+        .status-msg { font-size:12px; color:#00cc66; margin-top:8px; min-height:16px; }
+        .status-msg.err { color:#ff4444; }
 
-        .btn { width:100%; background:var(--ai-gradient); color:#fff; border:none; padding:14px; border-radius:12px; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:opacity 0.2s,transform 0.15s; box-shadow:0 4px 24px rgba(255,0,64,0.2); margin-top:4px; }
-        .btn:hover { opacity:0.9; transform:translateY(-1px); }
-        .btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
+        /* Ban list */
+        .ban-list { margin-top:16px; display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; }
+        .ban-item { background:#0d000d; border:1px solid #220022; border-radius:8px; padding:10px 12px; font-size:12px; color:#ccc; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+        .ban-item-uid { font-family:monospace; font-size:11px; overflow:hidden; text-overflow:ellipsis; }
+        .unban-btn { background:none; border:1px solid #330033; color:#ff4444; padding:3px 9px; border-radius:6px; cursor:pointer; font-size:11px; flex-shrink:0; transition:all 0.2s; }
+        .unban-btn:hover { background:rgba(255,0,0,0.1); border-color:#ff4444; }
+        .empty-note { font-size:12px; color:#440044; text-align:center; padding:16px 0; }
 
-        /* Name picker overlay */
-        #name-overlay { display:none; position:fixed; inset:0; background:rgba(11,0,11,0.92); z-index:2000; align-items:center; justify-content:center; padding:20px; }
-        #name-overlay.show { display:flex; }
-        .name-card { background:var(--card); border:1px solid var(--border); border-radius:24px; padding:36px 32px; width:100%; max-width:340px; box-shadow:0 0 50px rgba(255,0,64,0.1); animation:slideUp 0.3s cubic-bezier(0.22,1,0.36,1); }
-        .name-card-title { background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:18px; font-weight:800; margin-bottom:6px; }
-        .name-card-sub { font-size:12px; color:var(--subtext); margin-bottom:22px; line-height:1.5; }
+        .back-link { display:inline-block; margin-bottom:24px; color:var(--subtext); text-decoration:none; font-size:13px; }
+        .back-link:hover { color:#fff; }
 
-        .loading-overlay { display:none; position:fixed; inset:0; background:rgba(11,0,11,0.85); z-index:1500; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
-        .loading-overlay.show { display:flex; }
-        .spinner { width:40px; height:40px; border:3px solid #330033; border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
-        @keyframes spin { to{transform:rotate(360deg);} }
-        .loading-text { font-family:'DM Mono',monospace; font-size:12px; color:var(--subtext); }
-
-        .footer-note { font-family:'DM Mono',monospace; font-size:10px; color:#2a002a; text-align:center; margin-top:18px; }
+        /* Gate */
+        #gate { position:fixed; inset:0; background:var(--bg); z-index:999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+        #gate input { width:280px; padding:14px 18px; border-radius:12px; }
+        #gate .btn { width:280px; }
+        #gate-err { color:var(--accent); font-size:12px; min-height:16px; }
     </style>
 <script>
     function _loadFirebase(cb) {
@@ -80,322 +78,159 @@
 </script>
 </head>
 <body>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
 
-<div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
-    <div class="loading-text" id="loading-text">Entrando...</div>
+<!-- Admin Gate -->
+<div id="gate">
+    <div style="font-size:22px; font-weight:800; background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Admin Panel</div>
+    <input type="password" id="gate-pass" placeholder="Senha admin..." onkeydown="if(event.key==='Enter') checkGate()">
+    <div id="gate-err"></div>
+    <button class="btn" onclick="checkGate()">Entrar</button>
 </div>
 
-<!-- Name picker (Google first time) -->
-<div id="name-overlay">
-    <div class="name-card">
-        <div class="name-card-title" style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="url(#ng)"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0040"/><stop offset="100%" style="stop-color:#7a00ff"/></linearGradient></defs><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg> Bem-vindo!</div>
-        <div class="name-card-sub">É sua primeira vez aqui. Escolha um nome de usuário único para sua conta.</div>
-        <label class="input-label">Nome de usuário</label>
-        <input type="text" id="g-name" placeholder="Joãozinho Do Grau" oninput="checkGoogleName()" onkeydown="if(event.key==='Enter') confirmGoogleName()">
-        <div class="field-hint" id="g-name-hint"></div>
-        <div id="g-name-err" class="error-msg" style="margin-top:8px;"></div>
-        <button class="btn" id="g-name-btn" onclick="confirmGoogleName()" style="margin-top:14px;" disabled>Confirmar</button>
+<div id="admin-content" style="display:none;">
+    <a class="back-link" href="home.html">← Voltar ao chat</a>
+
+    <div class="admin-header">
+        <div class="admin-title">Antrop<span>Ai</span> Admin</div>
+        <div class="admin-sub">PAINEL DE CONTROLE</div>
+    </div>
+
+    <div class="grid">
+
+        <!-- Manutenção -->
+        <div class="card">
+            <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg> Modo Manutenção</div>
+            <div class="toggle-row">
+                <div>
+                    <div class="toggle-label">Suspender respostas</div>
+                    <div class="toggle-sub">Bloqueia envio de mensagens para todos</div>
+                </div>
+                <div class="big-toggle" id="maint-toggle" onclick="toggleMaintenance()"></div>
+            </div>
+            <div class="status-msg" id="maint-status"></div>
+        </div>
+
+        <!-- Aviso Global -->
+        <div class="card">
+            <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.54.8-1.07 1.2-1.61-.99-.74-2.24-1.68-3.2-2.4-.4.55-.8 1.08-1.2 1.62zM20.4 5.6c-.4-.54-.8-1.07-1.2-1.6-.96.72-2.24 1.65-3.2 2.39.4.54.8 1.07 1.2 1.61 1-.74 2.24-1.68 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg> Aviso Global</div>
+            <textarea id="banner-text" placeholder="Mensagem que aparece no topo para todos os usuários..."></textarea>
+            <button class="btn" onclick="saveBanner()">Publicar Aviso</button>
+            <button class="btn btn-ghost" onclick="clearBanner()" style="margin-top:8px;">Remover Aviso</button>
+            <div class="status-msg" id="banner-status"></div>
+        </div>
+
+        <!-- Banir usuário -->
+        <div class="card">
+            <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.68L5.68 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.68L18.32 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg> Banir Usuário</div>
+            <input type="text" id="ban-uid" placeholder="UID do usuário (ex: abc123xyz)">
+            <button class="btn btn-red" onclick="banUser()" style="margin-top:10px;">Banir</button>
+            <div class="status-msg" id="ban-status"></div>
+            <div class="ban-list" id="ban-list"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="card">
+            <div class="card-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Como usar</div>
+            <div style="font-size:12px; color:var(--subtext); line-height:1.8;">
+                <b style="color:#ccc;">UID do usuário:</b><br>
+                Está salvo no Firebase em <code style="color:#e0aaff;">users/{uid}</code> ou visível no console do navegador do usuário via <code style="color:#e0aaff;">localStorage.getItem('antro_uid')</code>
+                <br><br>
+                <b style="color:#ccc;">Manutenção:</b><br>
+                Liga/desliga o banner de manutenção e bloqueia envios no frontend.
+                <br><br>
+                <b style="color:#ccc;">Aviso:</b><br>
+                Texto aparece no topo da tela para todos os usuários logados em tempo real.
+            </div>
+        </div>
+
     </div>
 </div>
 
-<div class="card">
-    <div class="logo">
-        <div class="logo-text">Antrop<span class="grad">Ai</span></div>
-        <div class="logo-sub">Your personal intelligence</div>
-    </div>
-
-    <div class="tabs">
-        <div id="t-login" class="tab active" onclick="switchTab('login')">LOGIN</div>
-        <div id="t-reg"   class="tab"        onclick="switchTab('reg')">CADASTRO</div>
-    </div>
-
-    <button class="btn-google" onclick="loginGoogle()">
-        <svg width="18" height="18" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        Entrar com Google
-    </button>
-
-    <div class="divider"><div class="divider-line"></div><div class="divider-text">OU</div><div class="divider-line"></div></div>
-
-    <!-- LOGIN -->
-    <div id="f-login" class="form">
-        <div>
-            <label class="input-label">E-mail</label>
-            <input type="email" id="l-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter') doLogin()">
-        </div>
-        <div>
-            <label class="input-label">Senha</label>
-            <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
-        </div>
-        <div id="login-err" class="error-msg"></div>
-        <button class="btn" onclick="doLogin()">Entrar</button>
-    </div>
-
-    <!-- CADASTRO -->
-    <div id="f-reg" class="form hidden">
-        <div>
-            <label class="input-label">Nome de usuário</label>
-            <input type="text" id="r-name" placeholder="Joãozinho Do Grau" oninput="debounce('name', checkRegName)">
-            <div class="field-hint" id="r-name-hint"></div>
-        </div>
-        <div>
-            <label class="input-label">E-mail</label>
-            <input type="email" id="r-email" placeholder="seu@email.com" oninput="debounce('email', checkRegEmail)">
-            <div class="field-hint" id="r-email-hint"></div>
-        </div>
-        <div>
-            <label class="input-label">Senha (mín. 8 caracteres)</label>
-            <input type="password" id="r-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doRegister()">
-        </div>
-        <div id="reg-err" class="error-msg"></div>
-        <button class="btn" id="reg-btn" onclick="doRegister()">Criar Conta</button>
-    </div>
-
-    <div class="footer-note">AntropTeam · v1.0.0</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
 <script>
-// Firebase será inicializado após carregar URL do Gist
-let db, auth;
+// Troque esta senha por algo seguro
+const ADMIN_PASS = "antropteam2024";
+
+let db;
 _loadFirebase(function() {
-    firebase.initializeApp({
-        databaseURL: FIREBASE_URL,
-        apiKey: "SUA_API_KEY_AQUI",
-        authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-        projectId: "SEU_PROJECT_ID"
-    });
-    db   = firebase.database();
-    auth = firebase.auth();
+    firebase.initializeApp({ databaseURL: FIREBASE_URL });
+    db = firebase.database();
 });
 
-// Auto-login
-if (localStorage.getItem('is_logged') === 'true' && localStorage.getItem('antro_user')) {
-    window.location.replace('home.html');
+function checkGate() {
+    const val = document.getElementById('gate-pass').value;
+    if (val === ADMIN_PASS) {
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        initAdmin();
+    } else {
+        document.getElementById('gate-err').textContent = 'Senha incorreta.';
+    }
 }
 
-// ── TABS ──────────────────────────────────────────────────────────
-function switchTab(tab) {
-    document.getElementById('f-login').classList.toggle('hidden', tab === 'reg');
-    document.getElementById('f-reg').classList.toggle('hidden', tab === 'login');
-    document.getElementById('t-login').classList.toggle('active', tab === 'login');
-    document.getElementById('t-reg').classList.toggle('active', tab === 'reg');
+function initAdmin() {
+    // Watch maintenance
+    db.ref('admin/maintenance').on('value', snap => {
+        const on = snap.val() === true;
+        document.getElementById('maint-toggle').classList.toggle('on', on);
+    });
+
+    // Watch banner
+    db.ref('admin/global_banner').on('value', snap => {
+        const val = snap.val();
+        document.getElementById('banner-text').value = val || '';
+    });
+
+    // Watch ban list
+    db.ref('admin/banned').on('value', snap => {
+        const data = snap.val();
+        const list = document.getElementById('ban-list');
+        if (!data) { list.innerHTML = '<div class="empty-note">Nenhum usuário banido.</div>'; return; }
+        list.innerHTML = Object.keys(data).map(uid => `
+            <div class="ban-item">
+                <span class="ban-item-uid">${uid}</span>
+                <button class="unban-btn" onclick="unbanUser('${uid}')">Desbanir</button>
+            </div>`).join('');
+    });
 }
 
-function showLoading(on, txt = 'Entrando...') {
-    document.getElementById('loading-text').textContent = txt;
-    document.getElementById('loading').classList.toggle('show', on);
+function toggleMaintenance() {
+    const current = document.getElementById('maint-toggle').classList.contains('on');
+    db.ref('admin/maintenance').set(!current).then(() => {
+        showStatus('maint-status', !current ? 'Manutenção ativada.' : 'Manutenção desativada.');
+    });
 }
 
-function showError(id, msg) {
+function saveBanner() {
+    const msg = document.getElementById('banner-text').value.trim();
+    db.ref('admin/global_banner').set(msg || null).then(() => {
+        showStatus('banner-status', msg ? 'Aviso publicado!' : 'Aviso removido.');
+    });
+}
+
+function clearBanner() {
+    document.getElementById('banner-text').value = '';
+    db.ref('admin/global_banner').set(null).then(() => showStatus('banner-status', 'Aviso removido.'));
+}
+
+function banUser() {
+    const uid = document.getElementById('ban-uid').value.trim();
+    if (!uid) { showStatus('ban-status', 'Digite um UID.', true); return; }
+    const safe = uid.replace(/[.@\/]/g, '_');
+    db.ref(`admin/banned/${safe}`).set(true).then(() => {
+        document.getElementById('ban-uid').value = '';
+        showStatus('ban-status', `Usuário ${uid} banido.`);
+    });
+}
+
+function unbanUser(uid) {
+    db.ref(`admin/banned/${uid}`).remove().then(() => showStatus('ban-status', 'Usuário desbanido.'));
+}
+
+function showStatus(id, msg, err=false) {
     const el = document.getElementById(id);
     el.textContent = msg;
-    el.classList.remove('shake');
-    void el.offsetWidth;
-    el.classList.add('shake');
-}
-
-// ── NAME NORMALIZATION (para comparação de duplicatas) ─────────────
-function normalizeName(name) {
-    return name.trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
-// ── DEBOUNCE ──────────────────────────────────────────────────────
-const debounceTimers = {};
-function debounce(key, fn, delay = 600) {
-    clearTimeout(debounceTimers[key]);
-    debounceTimers[key] = setTimeout(fn, delay);
-}
-
-// ── REGISTER VALIDATION ───────────────────────────────────────────
-let regNameOk = false, regEmailOk = false;
-
-async function checkRegName() {
-    const val = document.getElementById('r-name').value.trim();
-    const hint = document.getElementById('r-name-hint');
-    const inp  = document.getElementById('r-name');
-    regNameOk = false;
-    if (!val) { hint.textContent = ''; inp.className = ''; return; }
-    if (val.length < 3) { hint.textContent = 'Mínimo 3 caracteres.'; hint.className = 'field-hint err'; inp.className = 'field-err'; return; }
-
-    hint.textContent = 'Verificando...'; hint.className = 'field-hint';
-    // Verifica duplicata no Firebase (normalizado)
-    const snap = await db.ref('usernames').once('value');
-    const existing = snap.val() || {};
-    const norm = normalizeName(val);
-    const taken = Object.values(existing).some(n => normalizeName(n) === norm);
-    if (taken) {
-        hint.textContent = 'Nome já em uso.'; hint.className = 'field-hint err'; inp.className = 'field-err';
-    } else {
-        hint.textContent = 'Disponível!'; hint.className = 'field-hint ok'; inp.className = 'field-ok';
-        regNameOk = true;
-    }
-}
-
-async function checkRegEmail() {
-    const val = document.getElementById('r-email').value.trim();
-    const hint = document.getElementById('r-email-hint');
-    const inp  = document.getElementById('r-email');
-    regEmailOk = false;
-    if (!val) { hint.textContent = ''; inp.className = ''; return; }
-    if (!/\S+@\S+\.\S+/.test(val)) { hint.textContent = 'E-mail inválido.'; hint.className = 'field-hint err'; inp.className = 'field-err'; return; }
-
-    hint.textContent = 'Verificando...'; hint.className = 'field-hint';
-    const snap = await db.ref('emails').once('value');
-    const existing = snap.val() || {};
-    const taken = Object.values(existing).some(e => e.toLowerCase() === val.toLowerCase());
-    if (taken) {
-        hint.textContent = 'E-mail já cadastrado.'; hint.className = 'field-hint err'; inp.className = 'field-err';
-    } else {
-        hint.textContent = 'Disponível!'; hint.className = 'field-hint ok'; inp.className = 'field-ok';
-        regEmailOk = true;
-    }
-}
-
-async function doRegister() {
-    const name  = document.getElementById('r-name').value.trim();
-    const email = document.getElementById('r-email').value.trim();
-    const pass  = document.getElementById('r-pass').value;
-    if (!name || !email || !pass) { showError('reg-err', 'Preencha todos os campos.'); return; }
-    if (!regNameOk)  { showError('reg-err', 'Escolha um nome disponível.'); return; }
-    if (!regEmailOk) { showError('reg-err', 'Use um e-mail disponível.'); return; }
-    if (pass.length < 8) { showError('reg-err', 'Senha mínima de 8 caracteres.'); return; }
-
-    showLoading(true, 'Criando conta...');
-    try {
-        const result = await auth.createUserWithEmailAndPassword(email, pass);
-        const uid = result.user.uid;
-        const safeUid = uid.replace(/[.@\/]/g, '_');
-        // Salva nome, email e perfil
-        await Promise.all([
-            db.ref('usernames/' + safeUid).set(name),
-            db.ref('emails/' + safeUid).set(email),
-            db.ref('profiles/' + safeUid).set({ name, email, bio: '', loginType: 'email', createdAt: Date.now() })
-        ]);
-        finishLogin(name, email, uid);
-    } catch(e) {
-        showLoading(false);
-        showError('reg-err', e.message);
-    }
-}
-
-// ── LOGIN ─────────────────────────────────────────────────────────
-async function doLogin() {
-    const email = document.getElementById('l-email').value.trim();
-    const pass  = document.getElementById('l-pass').value;
-    if (!email || !pass) { showError('login-err', 'Preencha todos os campos.'); return; }
-    showLoading(true);
-    try {
-        const result = await auth.signInWithEmailAndPassword(email, pass);
-        const uid = result.user.uid;
-        const safeUid = uid.replace(/[.@\/]/g, '_');
-        const nameSnap = await db.ref('usernames/' + safeUid).once('value');
-        const name = nameSnap.val() || email.split('@')[0];
-        finishLogin(name, email, uid);
-    } catch(e) {
-        showLoading(false);
-        if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-            showError('login-err', 'E-mail ou senha inválidos.');
-        } else {
-            showError('login-err', e.message);
-        }
-    }
-}
-
-// ── GOOGLE ────────────────────────────────────────────────────────
-let pendingGoogleUser = null;
-
-function loginGoogle() {
-    showLoading(true);
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(async result => {
-        const user = result.user;
-        if (!user.email) { auth.signOut(); showLoading(false); showError('login-err', 'É necessário um e-mail para acessar.'); return; }
-
-        const safeUid = user.uid.replace(/[.@\/]/g, '_');
-
-        // Verifica ban
-        const banSnap = await db.ref('admin/banned/' + safeUid).once('value');
-        if (banSnap.val() === true) { auth.signOut(); showLoading(false); showError('login-err', 'Conta suspensa.'); return; }
-
-        // Verifica se já tem nome (usuário existente)
-        const nameSnap = await db.ref('usernames/' + safeUid).once('value');
-        if (nameSnap.val()) {
-            finishLogin(nameSnap.val(), user.email, user.uid);
-        } else {
-            // Primeira vez — pede nome
-            showLoading(false);
-            pendingGoogleUser = user;
-            document.getElementById('name-overlay').classList.add('show');
-        }
-    }).catch(e => { showLoading(false); showError('login-err', 'Erro Google: ' + e.message); });
-}
-
-// ── GOOGLE NAME PICKER ────────────────────────────────────────────
-let googleNameOk = false;
-let googleNameTimer = null;
-
-async function checkGoogleName() {
-    const val = document.getElementById('g-name').value.trim();
-    const hint = document.getElementById('g-name-hint');
-    const btn  = document.getElementById('g-name-btn');
-    googleNameOk = false; btn.disabled = true;
-    if (!val || val.length < 3) { hint.textContent = val ? 'Mínimo 3 caracteres.' : ''; hint.className = 'field-hint err'; return; }
-    clearTimeout(googleNameTimer);
-    googleNameTimer = setTimeout(async () => {
-        hint.textContent = 'Verificando...'; hint.className = 'field-hint';
-        const snap = await db.ref('usernames').once('value');
-        const existing = snap.val() || {};
-        const norm = normalizeName(val);
-        const taken = Object.values(existing).some(n => normalizeName(n) === norm);
-        if (taken) {
-            hint.textContent = 'Nome já em uso.'; hint.className = 'field-hint err';
-        } else {
-            hint.textContent = 'Disponível!'; hint.className = 'field-hint ok';
-            googleNameOk = true; btn.disabled = false;
-        }
-    }, 600);
-}
-
-async function confirmGoogleName() {
-    if (!googleNameOk || !pendingGoogleUser) return;
-    const name = document.getElementById('g-name').value.trim();
-    const user = pendingGoogleUser;
-    const safeUid = user.uid.replace(/[.@\/]/g, '_');
-    showLoading(true, 'Configurando conta...');
-    document.getElementById('name-overlay').classList.remove('show');
-    await Promise.all([
-        db.ref('usernames/' + safeUid).set(name),
-        db.ref('emails/' + safeUid).set(user.email),
-        db.ref('profiles/' + safeUid).set({ name, email: user.email, bio: '', loginType: 'google', createdAt: Date.now() })
-    ]);
-    finishLogin(name, user.email, user.uid);
-}
-
-// ── FINISH LOGIN ──────────────────────────────────────────────────
-async function finishLogin(name, email, uid) {
-    const safeUid = uid.replace(/[.@\/]/g, '_');
-    // Ban check
-    const banSnap = await db.ref('admin/banned/' + safeUid).once('value');
-    if (banSnap.val() === true) {
-        auth.signOut(); showLoading(false);
-        showError('login-err', 'Sua conta foi suspensa. Contate o suporte.');
-        return;
-    }
-    localStorage.setItem('antro_user', name);
-    localStorage.setItem('antro_email', email);
-    localStorage.setItem('antro_uid', uid);
-    localStorage.setItem('is_logged', 'true');
-    window.location.replace('home.html');
+    el.className = 'status-msg' + (err ? ' err' : '');
+    setTimeout(() => el.textContent = '', 3000);
 }
 </script>
 </body>
