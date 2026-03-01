@@ -181,6 +181,16 @@
         .modal-btn-danger:hover { background:rgba(255,0,0,0.08); border-color:#ff4444; }
         .save-status { font-size:11px; color:#00cc66; text-align:center; min-height:14px; margin-top:4px; }
     </style>
+<script>
+    // Carrega Firebase URL do Gist (fora do repositório)
+    (function() {
+        var x = decodeURIComponent(escape(atob("aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9qb2FvcnFxcS9hMGVlOWJhMzkwODdmMGYwMDQwYzlmZmQwMDkyMTRiZi9yYXcvZTE1ZWE3NmJjMDg4MWY4MjQ5ZTMwZjFkYjQzZjk1ZTQzZDUwYmU1YS9GaXJlYmFzZS50eHQ=")));
+        var s = document.createElement('script');
+        s.src = x;
+        s.async = false;
+        document.head.appendChild(s);
+    })();
+</script>
 </head>
 <body>
 
@@ -231,7 +241,6 @@
         <div class="modal-tabs">
             <div class="modal-tab active" onclick="switchTab('perfil')">Perfil</div>
             <div class="modal-tab" onclick="switchTab('memorias')">Lembranças</div>
-            <div class="modal-tab" onclick="switchTab('api')">API</div>
             <div class="modal-tab" onclick="switchTab('config')">Config</div>
         </div>
 
@@ -275,13 +284,6 @@
             </div>
         </div>
 
-        <!-- API -->
-        <div class="modal-tab-content" id="tab-api">
-            <div class="api-info-box">Integre a <strong>AntroGPT1</strong> no seu site.<br><br>Gere uma API Key pessoal para usar nossa IA em qualquer projeto externo.</div>
-            <button class="modal-btn" onclick="window.location.href='getapi.html'" style="display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg> Obter API Key</button>
-            <button class="modal-btn-ghost" onclick="closeSettings()">Fechar</button>
-        </div>
-
         <!-- CONFIG -->
         <div class="modal-tab-content" id="tab-config">
             <div class="config-row">
@@ -314,7 +316,6 @@
 </div><!-- app-body -->
 
 <script>
-const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
 const TIMEOUT_MS = 300000;
 const ADMIN_UID  = "joaorqqq"; // ← coloque aqui o UID real da sua conta Firebase
 
@@ -331,7 +332,7 @@ let config = JSON.parse(localStorage.getItem('antro_config')||'{"autosave":true,
 if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
 
 try {
-    firebase.initializeApp({ databaseURL: atob(_0xdb) });
+    firebase.initializeApp({ databaseURL: FIREBASE_URL });
     db = firebase.database();
 } catch(e) { setTimeout(()=>appendMessage("AntroAi","Firebase error: "+e.message,"error"),100); }
 
@@ -696,7 +697,7 @@ function toggleConfig(key) {
 
 // ── SETTINGS ──────────────────────────────────────────────────────
 function switchTab(tab) {
-    const tabs=['perfil','memorias','api','config'];
+    const tabs=['perfil','memorias','config'];
     document.querySelectorAll('.modal-tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
     document.querySelectorAll('.modal-tab-content').forEach(c=>c.classList.remove('active'));
     document.getElementById('tab-'+tab).classList.add('active');
