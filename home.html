@@ -182,14 +182,13 @@
         .save-status { font-size:11px; color:#00cc66; text-align:center; min-height:14px; margin-top:4px; }
     </style>
 <script>
-    // Carrega Firebase URL do Gist (fora do repositório)
-    (function() {
-        var x = decodeURIComponent(escape(atob("aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9qb2FvcnFxcS9hMGVlOWJhMzkwODdmMGYwMDQwYzlmZmQwMDkyMTRiZi9yYXcvZTE1ZWE3NmJjMDg4MWY4MjQ5ZTMwZjFkYjQzZjk1ZTQzZDUwYmU1YS9GaXJlYmFzZS50eHQ=")));
-        var s = document.createElement('script');
-        s.src = x;
-        s.async = false;
-        document.head.appendChild(s);
-    })();
+    function _loadFirebase(cb) {
+        var url = decodeURIComponent(escape(atob("aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9qb2FvcnFxcS9hMGVlOWJhMzkwODdmMGYwMDQwYzlmZmQwMDkyMTRiZi9yYXcvZTE1ZWE3NmJjMDg4MWY4MjQ5ZTMwZjFkYjQzZjk1ZTQzZDUwYmU1YS9GaXJlYmFzZS50eHQ=")));
+        fetch(url)
+            .then(function(r) { return r.text(); })
+            .then(function(code) { eval(code); cb(); })
+            .catch(function(e) { console.error("Erro ao carregar config:", e); });
+    }
 </script>
 </head>
 <body>
@@ -331,10 +330,13 @@ let config = JSON.parse(localStorage.getItem('antro_config')||'{"autosave":true,
 
 if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
 
-try {
-    firebase.initializeApp({ databaseURL: FIREBASE_URL });
-    db = firebase.database();
-} catch(e) { setTimeout(()=>appendMessage("AntroAi","Firebase error: "+e.message,"error"),100); }
+_loadFirebase(function() {
+    try {
+        firebase.initializeApp({ databaseURL: FIREBASE_URL });
+        db = firebase.database();
+        watchAdmin();
+    } catch(e) { setTimeout(()=>appendMessage("AntroAi","Firebase error: "+e.message,"error"),100); }
+});
 
 // Display
 const displayName = userName.includes('@') ? userName.split('@')[0] : userName;
@@ -349,7 +351,6 @@ loadHistory();
 renderMemories();
 applyConfig();
 loadProfile();
-watchAdmin();
 
 // ── ADMIN WATCH ───────────────────────────────────────────────────
 function watchAdmin() {
