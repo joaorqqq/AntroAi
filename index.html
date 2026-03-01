@@ -69,6 +69,15 @@
 
         .footer-note { font-family:'DM Mono',monospace; font-size:10px; color:#2a002a; text-align:center; margin-top:18px; }
     </style>
+<script>
+    function _loadFirebase(cb) {
+        var url = decodeURIComponent(escape(atob("aHR0cHM6Ly9naXN0LmdpdGh1YnVzZXJjb250ZW50LmNvbS9qb2FvcnFxcS9hMGVlOWJhMzkwODdmMGYwMDQwYzlmZmQwMDkyMTRiZi9yYXcvZTE1ZWE3NmJjMDg4MWY4MjQ5ZTMwZjFkYjQzZjk1ZTQzZDUwYmU1YS9GaXJlYmFzZS50eHQ=")));
+        fetch(url)
+            .then(function(r) { return r.text(); })
+            .then(function(code) { eval(code); cb(); })
+            .catch(function(e) { console.error("Erro ao carregar config:", e); });
+    }
+</script>
 </head>
 <body>
 <div class="orb orb-1"></div>
@@ -156,15 +165,18 @@
 <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
 <script>
-const _0xdb = "aHR0cHM6Ly9hbGVhdG9yaWEtNGNkNDYtZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29tLw==";
-firebase.initializeApp({
-    databaseURL: atob(_0xdb),
-    apiKey: "AIzaSyB-cKarZpPxvSgHff8L6R_YdUY36TP_azw",
-    authDomain: "aleatoria-4cd46.firebaseapp.com",
-    projectId: "aleatoria-4cd46"
+// Firebase será inicializado após carregar URL do Gist
+let db, auth;
+_loadFirebase(function() {
+    firebase.initializeApp({
+        databaseURL: FIREBASE_URL,
+        apiKey: "SUA_API_KEY_AQUI",
+        authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+        projectId: "SEU_PROJECT_ID"
+    });
+    db   = firebase.database();
+    auth = firebase.auth();
 });
-const db = firebase.database();
-const auth = firebase.auth();
 
 // Auto-login
 if (localStorage.getItem('is_logged') === 'true' && localStorage.getItem('antro_user')) {
