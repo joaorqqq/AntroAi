@@ -9,6 +9,8 @@
     <!-- Highlight.js via jsDelivr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+    <!-- Marked.js para Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <style>
         :root {
             --bg:#0b000b; --sidebar:#1a001a; --accent:#ff0040;
@@ -66,6 +68,28 @@
         .msg-content.error  { color:#ff4444; font-style:italic; }
         .msg-content.warning { color:#ffcc00; font-style:italic; }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+        /* MARKDOWN STYLES */
+        .msg-content h1 { font-size:24px; font-weight:700; margin:16px 0 12px; color:#fff; border-bottom:2px solid #330033; padding-bottom:8px; }
+        .msg-content h2 { font-size:20px; font-weight:600; margin:14px 0 10px; color:#fff; }
+        .msg-content h3 { font-size:18px; font-weight:600; margin:12px 0 8px; color:#ddd; }
+        .msg-content h4 { font-size:16px; font-weight:600; margin:10px 0 6px; color:#ccc; }
+        .msg-content p { margin:8px 0; line-height:1.7; }
+        .msg-content strong { font-weight:700; color:#fff; }
+        .msg-content em { font-style:italic; color:#ddd; }
+        .msg-content ul, .msg-content ol { margin:10px 0; padding-left:24px; }
+        .msg-content ul li { list-style-type:disc; margin:6px 0; line-height:1.6; }
+        .msg-content ol li { list-style-type:decimal; margin:6px 0; line-height:1.6; }
+        .msg-content blockquote { border-left:3px solid var(--accent); padding:8px 16px; margin:12px 0; background:#1a001a; border-radius:4px; font-style:italic; color:#ccc; }
+        .msg-content a { color:var(--accent); text-decoration:underline; transition:opacity 0.2s; }
+        .msg-content a:hover { opacity:0.8; }
+        .msg-content hr { border:none; border-top:1px solid #330033; margin:16px 0; }
+        .msg-content code:not(.hljs) { background:#1a001a; color:#ff6ec7; padding:2px 6px; border-radius:4px; font-family:'Courier New',monospace; font-size:14px; }
+        .msg-content table { border-collapse:collapse; width:100%; margin:12px 0; background:#0d000d; border-radius:8px; overflow:hidden; }
+        .msg-content th { background:#1a001a; color:#fff; font-weight:600; padding:10px 12px; text-align:left; border-bottom:2px solid #330033; }
+        .msg-content td { padding:10px 12px; border-bottom:1px solid #220022; }
+        .msg-content tr:last-child td { border-bottom:none; }
+        .msg-content tr:hover { background:#1a001a; }
 
         /* TTS */
         .tts-btn { background:none; border:1px solid #330033; color:var(--subtext); font-size:11px; padding:4px 10px; border-radius:20px; cursor:pointer; margin-top:8px; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s; font-family:'Segoe UI',sans-serif; }
@@ -343,6 +367,16 @@ renderMemories();
 applyConfig();
 loadProfile();
 
+// Configurar marked.js
+if (typeof marked !== 'undefined') {
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
+        mangle: false
+    });
+}
+
 // ── ADMIN WATCH ───────────────────────────────────────────────────
 function watchAdmin() {
     if (!db) return;
@@ -368,35 +402,61 @@ function escapeHTML(str) {
 const EXT_MAP = { python:'py',py:'py',javascript:'js',js:'js',html:'html',css:'css',lua:'lua',bash:'sh',shell:'sh',json:'json',java:'java',cpp:'cpp',c:'c',php:'php',typescript:'ts',ts:'ts',sql:'sql',xml:'xml',yaml:'yml',rb:'rb',ruby:'rb' };
 
 function parseMessage(text) {
-    // Detecta ```lang= ou ```lang
+    // Primeiro, detecta e processa blocos de código
+    const codeBlocks = [];
     const codeRegex = /```(\w*)=?\n?([\s\S]*?)```/g;
-    let result = '', lastIndex = 0, match;
+    let textWithPlaceholders = text;
+    let match;
+    let blockIndex = 0;
+    
     while ((match = codeRegex.exec(text)) !== null) {
-        const before = text.slice(lastIndex, match.index);
-        if (before) result += escapeHTML(before).replace(/\n/g,'<br>');
-        const lang    = (match[1] || 'code').toLowerCase();
-        const code    = match[2];
-        const id      = 'cb' + Math.random().toString(36).slice(2,8);
-        const ext     = EXT_MAP[lang] || 'txt';
-        const isHTML  = lang === 'html';
-
-        // Highlight.js
+        const placeholder = `___CODE_BLOCK_${blockIndex}___`;
+        codeBlocks.push({
+            placeholder,
+            lang: (match[1] || 'code').toLowerCase(),
+            code: match[2]
+        });
+        textWithPlaceholders = textWithPlaceholders.replace(match[0], placeholder);
+        blockIndex++;
+    }
+    
+    // Processa o Markdown no texto sem blocos de código
+    let processed = textWithPlaceholders;
+    if (typeof marked !== 'undefined') {
+        try {
+            processed = marked.parse(processed);
+        } catch(e) {
+            console.error('Markdown parse error:', e);
+            processed = escapeHTML(textWithPlaceholders).replace(/\n/g, '<br>');
+        }
+    } else {
+        processed = escapeHTML(textWithPlaceholders).replace(/\n/g, '<br>');
+    }
+    
+    // Reinsere os blocos de código com syntax highlighting
+    codeBlocks.forEach(block => {
+        const id = 'cb' + Math.random().toString(36).slice(2,8);
+        const ext = EXT_MAP[block.lang] || 'txt';
+        const isHTML = block.lang === 'html';
+        
         let highlighted;
         try {
-            highlighted = lang && hljs.getLanguage(lang)
-                ? hljs.highlight(code, {language: lang, ignoreIllegals: true}).value
-                : hljs.highlightAuto(code).value;
-        } catch(e) { highlighted = escapeHTML(code); }
-
-        result += `<div class="code-block">
+            highlighted = block.lang && hljs.getLanguage(block.lang)
+                ? hljs.highlight(block.code, {language: block.lang, ignoreIllegals: true}).value
+                : hljs.highlightAuto(block.code).value;
+        } catch(e) { 
+            highlighted = escapeHTML(block.code); 
+        }
+        
+        const codeBlockHTML = `<div class="code-block">
             <div class="code-header">
-                <span class="code-lang">${escapeHTML(lang)}</span>
+                <span class="code-lang">${escapeHTML(block.lang)}</span>
                 <div class="code-actions">
                     <button class="code-btn" id="btn_${id}" onclick="copyCode('${id}')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                         Copiar
                     </button>
-                    <button class="code-btn" onclick="downloadCode('${id}','${ext}','${lang}')">
+                    <button class="code-btn" onclick="downloadCode('${id}','${ext}','${block.lang}')">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                         Baixar
                     </button>
@@ -408,11 +468,11 @@ function parseMessage(text) {
             </div>
             <pre><code class="hljs" id="body_${id}">${highlighted}</code></pre>
         </div>`;
-        lastIndex = match.index + match[0].length;
-    }
-    const rest = text.slice(lastIndex);
-    if (rest) result += escapeHTML(rest).replace(/\n/g,'<br>');
-    return result || escapeHTML(text).replace(/\n/g,'<br>');
+        
+        processed = processed.replace(block.placeholder, codeBlockHTML);
+    });
+    
+    return processed;
 }
 
 function copyCode(id) {
@@ -447,6 +507,8 @@ function closeWebview() {
 // ── TTS ───────────────────────────────────────────────────────────
 const TTS_ICON_PLAY = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg> Ouvir`;
 const TTS_ICON_STOP = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg> Parar`;
+let currentUtterance = null;
+
 function speakText(text, btn) {
     if (!window.speechSynthesis) return;
     if (currentUtterance) {
