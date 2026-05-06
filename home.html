@@ -8,10 +8,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-    <!-- Highlight.js via jsDelivr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
-    <!-- Marked.js para Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <style>
         :root {
@@ -22,481 +20,183 @@
         * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
         body { background:var(--bg); color:var(--text); font-family:'Segoe UI',Roboto,sans-serif; height:100vh; display:flex; overflow:hidden; flex-direction:column; }
 
-        /* BANNERS */
-        #maint-banner { display:none; background:#1a0000; border-bottom:2px solid var(--accent); padding:10px 20px; font-size:13px; color:#ff8888; text-align:center; font-weight:bold; flex-shrink:0; }
-        #maint-banner.show { display:block; }
-        #global-banner { display:none; background:linear-gradient(90deg,#330000,#1a001a); border-bottom:1px solid #660011; padding:9px 20px; font-size:13px; color:#ffaaaa; text-align:center; flex-shrink:0; }
-        #global-banner.show { display:block; }
-
         .app-body { display:flex; flex:1; overflow:hidden; position:relative; }
 
-        /* SIDEBAR */
         #sidebar { width:280px; background:var(--sidebar); height:100%; position:fixed; left:-280px; z-index:1000; transition:0.3s ease; display:flex; flex-direction:column; padding:20px; border-right:1px solid #330033; }
         #sidebar.active { left:0; }
         .menu-toggle { position:absolute; top:20px; left:20px; cursor:pointer; z-index:500; }
-        .new-chat-btn { background:#2a002a; padding:12px; border-radius:12px; text-align:center; font-size:14px; margin-top:50px; margin-bottom:14px; cursor:pointer; border:1px solid #440044; font-weight:bold; color:#fff; transition:background 0.2s; }
-        .new-chat-btn:hover { background:#3a003a; }
-        .sidebar-item { padding:10px 12px; cursor:pointer; border-radius:8px; font-size:14px; color:var(--subtext); display:flex; align-items:center; gap:10px; transition:background 0.2s,color 0.2s; margin-bottom:4px; }
-        .sidebar-item:hover { background:#2a002a; color:#fff; }
+        .new-chat-btn { background:#2a002a; padding:12px; border-radius:12px; text-align:center; font-size:14px; margin-top:50px; margin-bottom:14px; cursor:pointer; border:1px solid #440044; font-weight:bold; color:#fff; }
+        
         #history-section { flex:1; overflow-y:auto; margin-top:10px; }
-        #history-section::-webkit-scrollbar { width:2px; }
-        #history-section::-webkit-scrollbar-thumb { background:#330033; }
-        .history-label { font-size:10px; color:#440044; font-weight:bold; letter-spacing:1px; margin-bottom:8px; padding:0 4px; }
-        .history-item { padding:10px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; margin-bottom:4px; transition:all 0.2s; position:relative; }
+        .history-item { padding:10px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; margin-bottom:4px; transition:all 0.2s; }
         .history-item:hover { background:#2a002a; border-color:#440044; }
         .history-item.active { background:#2a002a; border-color:#660033; }
-        .history-item-title { font-size:13px; color:#ccc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:185px; }
-        .history-item-date { font-size:10px; color:#440044; margin-top:2px; }
-        .history-item-del { position:absolute; right:8px; top:50%; transform:translateY(-50%); color:#440044; font-size:16px; opacity:0; transition:opacity 0.2s; cursor:pointer; padding:4px; }
-        .history-item:hover .history-item-del { opacity:1; }
-        .history-item-del:hover { color:var(--accent); }
 
-        /* ADMIN FAB */
-        #admin-fab { display:none; position:fixed; bottom:110px; right:24px; width:52px; height:52px; border-radius:50%; background:var(--ai-gradient); border:none; cursor:pointer; z-index:300; box-shadow:0 4px 20px rgba(255,0,64,0.4); align-items:center; justify-content:center; font-size:22px; transition:transform 0.2s; }
-        #admin-fab:hover { transform:scale(1.1); }
-        #admin-fab.show { display:flex; }
-
-        /* MAIN */
         #main { flex-grow:1; display:flex; flex-direction:column; padding:20px; width:100%; height:100%; position:relative; }
         #chat-container { flex-grow:1; overflow-y:auto; width:100%; max-width:800px; margin:60px auto 140px auto; display:flex; flex-direction:column; gap:20px; padding:10px; }
-        #chat-container::-webkit-scrollbar { width:3px; }
-        #chat-container::-webkit-scrollbar-thumb { background:#330033; }
-
-        /* MESSAGES */
-        .message { animation:fadeIn 0.3s ease; }
+        
+        .message { animation:fadeIn 0.3s ease; margin-bottom: 20px; }
         .user-label { color:var(--accent); font-weight:bold; display:block; margin-bottom:5px; font-size:12px; }
         .ai-label { background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:bold; display:block; margin-bottom:5px; font-size:12px; }
         .msg-content { color:#e0e0e0; font-size:15px; line-height:1.7; word-wrap:break-word; }
-        .msg-content.error  { color:#ff4444; font-style:italic; }
-        .msg-content.warning { color:#ffcc00; font-style:italic; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
-
-        /* MARKDOWN STYLES */
-        .msg-content h1 { font-size:24px; font-weight:700; margin:16px 0 12px; color:#fff; border-bottom:2px solid #330033; padding-bottom:8px; }
-        .msg-content h2 { font-size:20px; font-weight:600; margin:14px 0 10px; color:#fff; }
-        .msg-content h3 { font-size:18px; font-weight:600; margin:12px 0 8px; color:#ddd; }
-        .msg-content h4 { font-size:16px; font-weight:600; margin:10px 0 6px; color:#ccc; }
-        .msg-content p { margin:8px 0; line-height:1.7; }
-        .msg-content strong { font-weight:700; color:#fff; }
-        .msg-content em { font-style:italic; color:#ddd; }
-        .msg-content ul, .msg-content ol { margin:10px 0; padding-left:24px; }
-        .msg-content ul li { list-style-type:disc; margin:6px 0; line-height:1.6; }
-        .msg-content ol li { list-style-type:decimal; margin:6px 0; line-height:1.6; }
-        .msg-content blockquote { border-left:3px solid var(--accent); padding:8px 16px; margin:12px 0; background:#1a001a; border-radius:4px; font-style:italic; color:#ccc; }
-        .msg-content a { color:var(--accent); text-decoration:underline; transition:opacity 0.2s; }
-        .msg-content a:hover { opacity:0.8; }
-        .msg-content hr { border:none; border-top:1px solid #330033; margin:16px 0; }
-        .msg-content code:not(.hljs) { background:#1a001a; color:#ff6ec7; padding:2px 6px; border-radius:4px; font-family:'Courier New',monospace; font-size:14px; }
-        .msg-content table { border-collapse:collapse; width:100%; margin:12px 0; background:#0d000d; border-radius:8px; overflow:hidden; }
-        .msg-content th { background:#1a001a; color:#fff; font-weight:600; padding:10px 12px; text-align:left; border-bottom:2px solid #330033; }
-        .msg-content td { padding:10px 12px; border-bottom:1px solid #220022; }
-        .msg-content tr:last-child td { border-bottom:none; }
-        .msg-content tr:hover { background:#1a001a; }
-
-        /* TTS */
-        .tts-btn { background:none; border:1px solid #330033; color:var(--subtext); font-size:11px; padding:4px 10px; border-radius:20px; cursor:pointer; margin-top:8px; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s; font-family:'Segoe UI',sans-serif; }
-        .tts-btn:hover { border-color:#660044; color:#fff; }
-        .tts-btn.speaking { border-color:var(--accent); color:var(--accent); }
-
-        /* Typewriter cursor */
-        .tw-cursor { display:inline-block; width:2px; height:14px; background:var(--accent); margin-left:2px; vertical-align:middle; animation:blink 0.7s infinite; }
-        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-
-        /* Waiting dots */
-        .typing { display:inline-flex; gap:5px; align-items:center; padding:4px 0; }
-        .typing span { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:tdot 0.9s ease infinite; }
-        .typing span:nth-child(2) { animation-delay:0.15s; }
-        .typing span:nth-child(3) { animation-delay:0.30s; }
-        @keyframes tdot { 0%,80%,100%{transform:translateY(0);opacity:0.3;} 40%{transform:translateY(-6px);opacity:1;} }
-
-        /* CODE BLOCKS */
+        
         .code-block { background:#0d000d; border:1px solid #2a002a; border-radius:12px; margin:10px 0; overflow:hidden; }
-        .code-header { background:#1a001a; padding:8px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #2a002a; gap:8px; }
-        .code-lang { font-size:12px; font-weight:bold; color:var(--subtext); letter-spacing:0.5px; margin-right:auto; font-family:'Courier New',monospace; }
-        .code-actions { display:flex; gap:6px; flex-wrap:wrap; }
-        .code-btn { background:none; border:1px solid #330033; cursor:pointer; color:var(--subtext); font-size:11px; display:flex; align-items:center; gap:4px; padding:3px 9px; border-radius:6px; transition:all 0.2s; font-family:'Segoe UI',sans-serif; white-space:nowrap; }
-        .code-btn:hover { background:#2a002a; color:#fff; border-color:#550044; }
-        .code-btn.copied { color:#00cc66; border-color:#00cc66; }
-        /* Highlight.js overrides */
-        .hljs { background:transparent !important; padding:14px 16px !important; font-size:13px !important; line-height:1.6 !important; overflow-x:auto; display:block; font-family:'Courier New',monospace; }
+        .hljs { background:transparent !important; padding:14px 16px !important; font-size:13px !important; }
 
-        /* WEBVIEW */
-        #webview-panel { display:none; position:fixed; top:0; right:0; width:50%; height:100%; background:#fff; z-index:800; flex-direction:column; border-left:2px solid var(--accent); }
-        #webview-panel.open { display:flex; }
-        #webview-header { background:#1a001a; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #330033; flex-shrink:0; }
-        #webview-header span { font-size:13px; color:var(--subtext); font-weight:bold; }
-        #webview-close { background:none; border:none; color:var(--accent); font-size:22px; cursor:pointer; line-height:1; }
-        #webview-frame { flex:1; border:none; width:100%; }
-
-        /* LOBBY */
-        #lobby { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); text-align:left; width:90%; max-width:550px; }
-        .greeting { font-size:40px; font-weight:600; letter-spacing:-1px; }
-        .sub-greeting { font-size:40px; font-weight:600; color:#220022; }
-
-        /* BOTTOM UI */
-        .bottom-ui { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); width:92%; max-width:700px; background:var(--input-bg); border-radius:24px; padding:12px 20px; border:1px solid #440044; display:flex; flex-direction:column; gap:10px; z-index:100; }
-        .input-row { display:flex; align-items:center; width:100%; gap:12px; }
+        .bottom-ui { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); width:92%; max-width:700px; background:var(--input-bg); border-radius:24px; padding:12px 20px; border:1px solid #440044; display:flex; align-items:center; gap:10px; z-index:100; }
         #prompt { background:transparent; border:none; color:white; flex-grow:1; padding:5px; font-size:16px; outline:none; }
-        #prompt:disabled { opacity:0.5; }
-        .svg-icon { width:24px; height:24px; fill:var(--subtext); cursor:pointer; transition:0.2s; flex-shrink:0; }
-        .svg-icon:hover { fill:#fff; }
-        .send-btn { fill:#330033; }
+        .svg-icon { width:24px; height:24px; fill:var(--subtext); cursor:pointer; }
         .send-btn.active { fill:var(--accent); }
+        
         #overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:900; }
-
-        /* SETTINGS MODAL */
-        #modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1500; align-items:center; justify-content:center; padding:20px; }
-        #modal-overlay.open { display:flex; }
-        #settings-modal { background:var(--sidebar); border:1px solid #440044; border-radius:20px; width:100%; max-width:380px; max-height:90vh; overflow-y:auto; box-shadow:0 0 40px rgba(255,0,64,0.1); animation:modalIn 0.25s cubic-bezier(0.22,1,0.36,1); }
-        #settings-modal::-webkit-scrollbar { width:2px; }
-        #settings-modal::-webkit-scrollbar-thumb { background:#330033; }
-        @keyframes modalIn { from{opacity:0;transform:scale(0.94) translateY(10px);} to{opacity:1;transform:scale(1) translateY(0);} }
-        .modal-header { padding:22px 24px 0; }
-        .modal-title { background:var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:18px; font-weight:bold; margin-bottom:16px; }
-        .modal-tabs { display:flex; border-bottom:1px solid #2a002a; padding:0 24px; overflow-x:auto; }
-        .modal-tabs::-webkit-scrollbar { display:none; }
-        .modal-tab { padding:10px 11px; font-size:11px; font-weight:bold; color:var(--subtext); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; letter-spacing:0.5px; margin-bottom:-1px; white-space:nowrap; }
-        .modal-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-        .modal-tab-content { display:none; padding:20px 24px 24px; }
-        .modal-tab-content.active { display:block; }
-
-        /* Profile tab */
-        .profile-avatar { width:64px; height:64px; border-radius:50%; background:var(--ai-gradient); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:bold; margin:0 auto 16px; color:#fff; }
-        .profile-field { margin-bottom:14px; }
-        .profile-label { font-size:10px; color:var(--subtext); font-weight:bold; letter-spacing:1px; margin-bottom:6px; display:block; }
-        .profile-input { width:100%; background:#0d000d; border:1px solid #2a002a; border-radius:10px; padding:10px 12px; color:#fff; font-size:13px; outline:none; transition:border-color 0.2s; font-family:'Segoe UI',sans-serif; }
-        .profile-input:focus { border-color:#660033; }
-        textarea.profile-input { resize:vertical; min-height:80px; line-height:1.5; }
-        .profile-hint { font-size:10px; min-height:13px; margin-top:3px; font-family:'Courier New',monospace; }
-        .profile-hint.ok  { color:#00cc66; }
-        .profile-hint.err { color:#ff4444; }
-        .profile-info { font-size:11px; color:var(--subtext); background:#0d000d; border:1px solid #220022; border-radius:8px; padding:8px 12px; }
-
-        /* Memory tab */
-        .memory-list { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:180px; overflow-y:auto; }
-        .memory-item { background:#0d000d; border:1px solid #220022; border-radius:10px; padding:10px 12px; font-size:12px; color:#ccc; line-height:1.5; display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-        .memory-del { color:#440044; cursor:pointer; font-size:18px; flex-shrink:0; transition:color 0.2s; line-height:1; }
-        .memory-del:hover { color:var(--accent); }
-        .memory-empty { font-size:12px; color:#440044; text-align:center; padding:20px 0; }
-        .memory-input-row { display:flex; gap:8px; }
-        .memory-input { flex:1; background:#0d000d; border:1px solid #2a002a; border-radius:10px; padding:10px 12px; color:#fff; font-size:13px; outline:none; font-family:'Segoe UI',sans-serif; }
-        .memory-input:focus { border-color:#660033; }
-        .memory-add-btn { background:var(--ai-gradient); color:#fff; border:none; border-radius:10px; padding:0 16px; cursor:pointer; font-size:20px; }
-
-        /* API tab */
-        .api-info-box { background:#0d000d; border:1px solid #220022; border-radius:12px; padding:14px; font-size:12px; color:var(--subtext); line-height:1.6; margin-bottom:16px; }
-        .api-info-box strong { color:#cc0033; }
-
-        /* Config tab */
-        .config-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid #1a001a; }
-        .config-row:last-of-type { border-bottom:none; }
-        .config-label { font-size:13px; color:#ccc; }
-        .config-sub { font-size:11px; color:var(--subtext); margin-top:2px; }
-        .toggle { width:40px; height:22px; background:#2a002a; border-radius:11px; cursor:pointer; position:relative; transition:background 0.25s; flex-shrink:0; }
-        .toggle.on { background:var(--accent); }
-        .toggle::after { content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left 0.25s; }
-        .toggle.on::after { left:21px; }
-
-        /* Shared buttons */
-        .modal-btn { width:100%; background:var(--ai-gradient); color:#fff; border:none; padding:13px; border-radius:12px; font-size:13px; font-weight:bold; letter-spacing:1px; cursor:pointer; transition:opacity 0.2s,transform 0.15s; margin-bottom:10px; font-family:'Segoe UI',sans-serif; }
-        .modal-btn:hover { opacity:0.88; transform:translateY(-1px); }
-        .modal-btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
-        .modal-btn-ghost { width:100%; background:transparent; color:var(--subtext); border:1px solid #330033; padding:11px; border-radius:12px; font-size:12px; cursor:pointer; transition:all 0.2s; font-family:'Segoe UI',sans-serif; margin-bottom:8px; }
-        .modal-btn-ghost:hover { border-color:#550044; color:#fff; }
-        .modal-btn-danger { width:100%; background:transparent; color:#ff4444; border:1px solid #330011; padding:11px; border-radius:12px; font-size:12px; cursor:pointer; transition:all 0.2s; margin-top:10px; font-family:'Segoe UI',sans-serif; }
-        .modal-btn-danger:hover { background:rgba(255,0,0,0.08); border-color:#ff4444; }
-        .save-status { font-size:11px; color:#00cc66; text-align:center; min-height:14px; margin-top:4px; }
+        
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
     </style>
-
 </head>
 <body>
 
-<div id="maint-banner"><svg width="14" height="14" viewBox="0 0 24 24" fill="#ff8888" style="vertical-align:middle;margin-right:6px"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg> Servidor em Manutenção — respostas pausadas.</div>
-<div id="global-banner"></div>
-
 <div class="app-body">
-
-<div class="menu-toggle" onclick="toggleMenu()">
-    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-</div>
-<div id="overlay" onclick="toggleMenu()"></div>
-
-<!-- Admin FAB -->
-<button id="admin-fab" onclick="window.location.href='admin.html'" title="Painel Admin">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-</button>
-
-<div id="sidebar">
-    <div class="new-chat-btn" onclick="newChat()">+ New Chat</div>
-    <p style="color:var(--accent);font-weight:bold;margin-bottom:8px;font-size:18px;">AntroAi</p>
-    <div class="sidebar-item" onclick="openSettings()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-        Settings
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
     </div>
-    <div id="history-section">
-        <div class="history-label">CONVERSAS</div>
-        <div id="history-list"></div>
-    </div>
-    <div style="margin-top:auto;padding-top:16px;border-top:1px solid #220022;">
-        <div style="color:var(--accent);cursor:pointer;font-size:14px;" onclick="logout()">Sign Out</div>
-    </div>
-</div>
+    <div id="overlay" onclick="toggleMenu()"></div>
 
-<!-- WebView -->
-<div id="webview-panel">
-    <div id="webview-header">
-        <span style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg> Preview</span>
-        <button id="webview-close" onclick="closeWebview()">×</button>
-    </div>
-    <iframe id="webview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-</div>
-
-<!-- Settings Modal -->
-<div id="modal-overlay" onclick="handleOverlayClick(event)">
-    <div id="settings-modal">
-        <div class="modal-header"><div class="modal-title" style="display:flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="url(#mg)"><defs><linearGradient id="mg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0040"/><stop offset="100%" style="stop-color:#7a00ff"/></linearGradient></defs><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg> Settings</div></div>
-        <div class="modal-tabs">
-            <div class="modal-tab active" onclick="switchTab('perfil')">Perfil</div>
-            <div class="modal-tab" onclick="switchTab('memorias')">Lembranças</div>
-            <div class="modal-tab" onclick="switchTab('config')">Config</div>
+    <div id="sidebar">
+        <div class="new-chat-btn" onclick="newChat()">+ New Chat</div>
+        <p style="color:var(--accent);font-weight:bold;margin-bottom:8px;font-size:18px;">AntroAi</p>
+        <div id="history-section">
+            <div id="history-list"></div>
         </div>
+    </div>
 
-        <!-- PERFIL -->
-        <div class="modal-tab-content active" id="tab-perfil">
-            <div class="profile-avatar" id="profile-avatar">?</div>
-
-            <div class="profile-field">
-                <label class="profile-label">Nome de usuário</label>
-                <input class="profile-input" id="p-name" type="text" placeholder="Seu nome" oninput="debounceProfile('name', checkProfileName)">
-                <div class="profile-hint" id="p-name-hint"></div>
-            </div>
-
-            <div class="profile-field">
-                <label class="profile-label">Bio <span style="color:#330033;font-size:9px;">(a IA lê antes de responder)</span></label>
-                <textarea class="profile-input" id="p-bio" placeholder="Ex: Sou dev, gosto de Lua e Python, moro em SP..."></textarea>
-            </div>
-
-            <div class="profile-field" id="p-email-row">
-                <label class="profile-label">E-mail</label>
-                <div class="profile-info" id="p-email-display"></div>
-            </div>
-
-            <div class="profile-field" id="p-pass-row" style="display:none;">
-                <label class="profile-label">Nova senha</label>
-                <input class="profile-input" id="p-pass" type="password" placeholder="Mínimo 8 caracteres">
-                <div class="profile-hint" id="p-pass-hint"></div>
-            </div>
-
-            <button class="modal-btn" id="p-save-btn" onclick="saveProfile()">Salvar Perfil</button>
-            <div class="save-status" id="p-save-status"></div>
-        </div>
-
-        <!-- LEMBRANÇAS -->
-        <div class="modal-tab-content" id="tab-memorias">
-            <div style="font-size:11px;color:var(--subtext);margin-bottom:12px;line-height:1.5;">A IA extrai automaticamente informações importantes das conversas e salva aqui. Você também pode adicionar manualmente.</div>
-            <div class="memory-list" id="memory-list"></div>
-            <div class="memory-input-row">
-                <input class="memory-input" id="memory-input" placeholder="Adicionar lembrança..." onkeydown="if(event.key==='Enter') addMemory()">
-                <button class="memory-add-btn" onclick="addMemory()">+</button>
-            </div>
-        </div>
-
-        <!-- CONFIG -->
-        <div class="modal-tab-content" id="tab-config">
-            <div class="config-row">
-                <div><div class="config-label">Auto-save</div><div class="config-sub">Salva chats automaticamente</div></div>
-                <div class="toggle on" id="toggle-autosave" onclick="toggleConfig('autosave')"></div>
-            </div>
-            <div class="config-row">
-                <div><div class="config-label">Animação de digitação</div><div class="config-sub">IA digita letra por letra</div></div>
-                <div class="toggle on" id="toggle-typewriter" onclick="toggleConfig('typewriter')"></div>
-            </div>
-            <button class="modal-btn-danger" onclick="clearAllChats()" style="display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Apagar todas as conversas</button>
+    <div id="main">
+        <div id="chat-container"></div>
+        <div class="bottom-ui">
+            <input type="text" id="prompt" placeholder="Digite sua mensagem..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
+            <svg id="send-icon" class="svg-icon" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </div>
     </div>
 </div>
-
-<div id="main">
-    <div id="lobby">
-        <h1 class="greeting" id="user-display">Hello!</h1>
-        <h1 class="sub-greeting">How can I help you today?</h1>
-    </div>
-    <div id="chat-container"></div>
-    <div class="bottom-ui">
-        <div class="input-row">
-            <input type="text" id="prompt" placeholder="Ask anything to AntroAi..." oninput="checkInput()" onkeydown="if(event.key==='Enter') triggerIA()">
-            <svg id="send-icon" class="svg-icon send-btn" viewBox="0 0 24 24" onclick="triggerIA()"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </div>
-    </div>
-</div>
-
-</div><!-- app-body -->
 
 <script>
-// CONFIGURAÇÕES GERAIS
+// CONFIGURAÇÕES
 const FIREBASE_URL = "https://aleatoria-4cd46-default-rtdb.firebaseio.io.com/"; 
-const VERCEL_URL = "https://antro-proxy.vercel.app/api/v1"; // Substitua pela sua URL real
+const VERCEL_URL = "https://antro-proxy.vercel.app/api/v1";
 
-const userName  = localStorage.getItem('antro_user')  || 'User';
-const userUID   = localStorage.getItem('antro_uid')   || '';
-const safeUID   = userUID.replace(/[.@\/]/g,'_');
+const userUID = localStorage.getItem('antro_uid') || 'guest';
+const safeUID = userUID.replace(/[.@\/]/g,'_');
+let currentChatId = null;
+let isLoading = false;
 
-let db = null, isLoading = false, currentChatId = null;
+// INICIALIZAR FIREBASE
+firebase.initializeApp({ databaseURL: FIREBASE_URL });
+const db = firebase.database();
 
-// Bloqueio de acesso sem login
-if (localStorage.getItem('is_logged') !== 'true') window.location.href = 'index.html';
-
-try {
-    // Inicialização direta do Firebase
-    firebase.initializeApp({ databaseURL: FIREBASE_URL });
-    db = firebase.database();
-    
-    // Inicia a escuta do histórico na nuvem (Realtime)
-    syncHistory();
-} catch(e) { 
-    console.error("Falha ao conectar no Firebase:", e); 
-}
-
-// --- UTILITÁRIOS DE INTERFACE ---
-
+// RENDERIZAR MENSAGENS
 function parseMessage(text) {
-    if(!text) return "";
-    // O marked processa o Markdown e o HLJS cuida do código nos blocos ```
     return marked.parse(text);
 }
 
-function getOrCreateAiBubble() {
-    const container = document.getElementById('chat-container');
-    let lastMsg = container.lastElementChild;
-    
-    // Reaproveita a última bolha se ela já for da IA (para o efeito de streaming)
-    if (lastMsg && lastMsg.dataset.sender === "AntroAi") {
-        return lastMsg.querySelector('.msg-content');
-    }
-    
-    const div = document.createElement('div');
-    div.className = 'message';
-    div.dataset.sender = "AntroAi";
-    div.innerHTML = `<span class="ai-label">ANTROAI</span><div class="msg-content"></div>`;
-    container.appendChild(div);
-    return div.querySelector('.msg-content');
-}
-
-function appendUserMessage(text) {
+function appendMessage(sender, text) {
     const container = document.getElementById('chat-container');
     const div = document.createElement('div');
     div.className = 'message';
-    div.dataset.sender = "User";
-    div.innerHTML = `<span class="user-label">${userName.toUpperCase()}</span><div class="msg-content">${parseMessage(text)}</div>`;
+    const label = sender === "AntroAi" ? "ai-label" : "user-label";
+    div.innerHTML = `<span class="${label}">${sender.toUpperCase()}</span><div class="msg-content">${parseMessage(text)}</div>`;
     container.appendChild(div);
+    div.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
     container.scrollTop = container.scrollHeight;
 }
 
-// --- LÓGICA DE PROCESSAMENTO (VERCEL + STREAMING) ---
-
+// LOGICA PRINCIPAL
 async function triggerIA() {
-    if(isLoading || !db) return;
+    if(isLoading) return;
     const input = document.getElementById('prompt');
     const msg = input.value.trim();
     if(!msg) return;
 
     if(!currentChatId) currentChatId = 'chat_' + Date.now();
-    
-    // 1. UI & Persistência Local da Pergunta
-    appendUserMessage(msg);
-    await saveMessageToHistory(currentChatId, userName, msg);
+
+    // 1. Mostrar e Salvar Mensagem do Usuário no Firebase
+    appendMessage("Você", msg);
+    saveToFirebase(currentChatId, "User", msg);
     
     input.value = '';
     setLoading(true);
 
-    // 2. Criação da Fila no Firebase
-    const queueRef = db.ref('queue').push();
-    const responseKey = queueRef.key; 
-    const responseRef = db.ref(`responses/${responseKey}`);
+    try {
+        // 2. Chamar Vercel (A Vercel só gera o texto e devolve)
+        const response = await fetch(VERCEL_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: "chat_ai", message: msg })
+        });
 
-    await queueRef.set({
-        message: msg,
-        uid: userUID,
-        chatId: currentChatId,
-        status: "pending",
-        responseKey: responseKey,
-        time: Date.now()
-    });
+        const data = await response.json();
 
-    // 3. Trigger na Vercel (Acorda a API)
-    fetch(VERCEL_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ responseKey: responseKey, message: msg, uid: userUID })
-    }).catch(() => console.log("Processando via worker..."));
-
-    let fullResponseText = "";
-
-    // 4. Recebimento por fatias (Chunks de 10 linhas)
-    responseRef.on('child_added', (snap) => {
-        const chunk = snap.val().text;
-        fullResponseText += chunk + "\n";
-        
-        const bubble = getOrCreateAiBubble();
-        bubble.innerHTML = parseMessage(fullResponseText);
-        
-        // Aplica o neon/highlight no código em tempo real
-        bubble.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-        
-        const container = document.getElementById('chat-container');
-        container.scrollTop = container.scrollHeight;
-    });
-
-    // 5. Finalização e Limpeza
-    queueRef.on('value', async (snap) => {
-        const data = snap.val();
-        if(data && data.status === "completed") {
-            setLoading(false);
-            
-            // Salva o script/texto completo no histórico permanente
-            await saveMessageToHistory(currentChatId, "AntroAi", fullResponseText);
-            
-            // Limpa os temporários para não poluir o banco gratuito
-            responseRef.off();
-            queueRef.off();
-            queueRef.remove();
-            responseRef.remove();
+        if (data.sucesso) {
+            // 3. Mostrar Resposta e Salvar no Firebase (pelo Front-end)
+            appendMessage("AntroAi", data.resposta);
+            saveToFirebase(currentChatId, "AntroAi", data.resposta);
+        } else {
+            appendMessage("Sistema", "Erro ao processar resposta.");
         }
-    });
+    } catch (e) {
+        appendMessage("Sistema", "Falha de conexão com o servidor.");
+    } finally {
+        setLoading(false);
+    }
 }
 
-// --- BANCO DE DADOS POTENTE (SINCRONIZAÇÃO) ---
-
-async function saveMessageToHistory(chatId, sender, text) {
-    if(!text) return;
+// SALVAMENTO NO FIREBASE (FRONT-END APENAS)
+function saveToFirebase(chatId, sender, text) {
     const ref = db.ref(`users/${safeUID}/chats/${chatId}/messages`).push();
-    await ref.set({
+    ref.set({
         sender: sender,
         text: text,
         time: Date.now()
     });
 
-    // Atualiza o card na barra lateral
     db.ref(`users/${safeUID}/chats/${chatId}/info`).update({
-        title: text.slice(0, 40),
+        title: text.slice(0, 30) + "...",
         lastUpdate: Date.now()
     });
 }
 
+// FUNÇÕES DE UI
+function setLoading(on) {
+    isLoading = on;
+    document.getElementById('prompt').disabled = on;
+}
+
+function checkInput() {
+    const hasText = document.getElementById('prompt').value.length > 0;
+    document.getElementById('send-icon').classList.toggle('active', hasText);
+}
+
+function toggleMenu() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('overlay').style.display = 
+        document.getElementById('sidebar').classList.contains('active') ? 'block' : 'none';
+}
+
+function newChat() {
+    currentChatId = null;
+    document.getElementById('chat-container').innerHTML = '';
+}
+
+// SINCRONIZAR HISTÓRICO
 function syncHistory() {
     db.ref(`users/${safeUID}/chats`).on('value', (snap) => {
         const chats = snap.val();
         const list = document.getElementById('history-list');
-        if(!list) return;
-        
         list.innerHTML = '';
         if(!chats) return;
 
-        // Ordena pelos mais recentes primeiro
-        Object.keys(chats).sort((a,b) => chats[b].info.lastUpdate - chats[a].info.lastUpdate).forEach(id => {
+        Object.keys(chats).reverse().forEach(id => {
             const div = document.createElement('div');
-            div.className = `history-item ${id === currentChatId ? 'active' : ''}`;
-            div.innerHTML = `<div class="history-item-title">${chats[id].info.title}</div>`;
+            div.className = 'history-item';
+            div.innerText = chats[id].info.title;
             div.onclick = () => loadChat(id);
             list.appendChild(div);
         });
@@ -507,61 +207,16 @@ function loadChat(id) {
     currentChatId = id;
     const container = document.getElementById('chat-container');
     container.innerHTML = '';
-    
-    // Esconde o lobby/welcome se existir
-    const lobby = document.getElementById('lobby');
-    if(lobby) lobby.style.display = 'none';
-
     db.ref(`users/${safeUID}/chats/${id}/messages`).once('value', (snap) => {
         const msgs = snap.val();
         if(msgs) {
-            Object.values(msgs).forEach(m => {
-                const isAI = m.sender === "AntroAi";
-                const div = document.createElement('div');
-                div.className = 'message';
-                div.innerHTML = `<span class="${isAI?'ai-label':'user-label'}">${m.sender.toUpperCase()}</span><div class="msg-content">${parseMessage(m.text)}</div>`;
-                container.appendChild(div);
-                div.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-            });
-            container.scrollTop = container.scrollHeight;
+            Object.values(msgs).forEach(m => appendMessage(m.sender, m.text));
         }
     });
-    
-    if(window.innerWidth < 768) toggleMenu();
+    toggleMenu();
 }
 
-// --- CONTROLES DE UI ---
-
-function setLoading(on) {
-    isLoading = on;
-    const prompt = document.getElementById('prompt');
-    prompt.disabled = on;
-    if(!on) prompt.focus();
-}
-
-function checkInput() {
-    const hasText = document.getElementById('prompt').value.length > 0;
-    document.getElementById('send-icon').classList.toggle('active', hasText && !isLoading);
-}
-
-function toggleMenu() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    if(!sidebar) return;
-    
-    const active = sidebar.classList.toggle('active');
-    if(overlay) overlay.style.display = active ? 'block' : 'none';
-}
-
-function newChat() {
-    currentChatId = null;
-    document.getElementById('chat-container').innerHTML = '';
-    const lobby = document.getElementById('lobby');
-    if(lobby) lobby.style.display = 'block';
-}
-
-function logout() {
-    localStorage.clear();
-    window.location.href = 'index.html';
-}
+syncHistory();
 </script>
+</body>
+</html>
